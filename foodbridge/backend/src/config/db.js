@@ -95,16 +95,19 @@ function handleMemoryQuery(text, params = []) {
 
   if (sql.includes("INSERT INTO listings")) {
     const id = memoryStore.listings.length + 1;
+    const donorId = Number(params[0]) || 1;
+    const donor = memoryStore.users.find(u => u.id === donorId) || memoryStore.users[0];
+    const mins = Number(params[5]) || 120;
     const item = {
       id,
-      donor_id: params[0] || 1,
-      donor_name: "Campus Canteen Manager",
-      donor_org: "Green Valley Dining Hall",
+      donor_id: donorId,
+      donor_name: donor ? donor.name : "Campus Canteen Manager",
+      donor_org: donor ? (donor.org || donor.name) : "Green Valley Dining Hall",
       title: params[1],
       meals: Number(params[2]),
       pickup_address: params[3],
       notes: params[4] || null,
-      expires_at: params[5],
+      expires_at: new Date(Date.now() + mins * 60000).toISOString(),
       status: "available",
       volunteer_id: null,
       volunteer_name: null,

@@ -127,13 +127,14 @@ export function getCurrentUser(roleKey = "donor") {
 /**
  * Execute HTTP API requests with fallback to local mock store on connection failure.
  */
-export async function apiCall(path, { method = "GET", body, userId = "usr_101" } = {}) {
+export async function apiCall(path, { method = "GET", body, userId = "usr_101", userRole = "donor" } = {}) {
   try {
     const res = await fetch(path, {
       method,
       headers: {
         "Content-Type": "application/json",
-        "x-user-id": userId,
+        "x-user-id": String(userId),
+        "x-user-role": String(userRole),
       },
       body: body ? JSON.stringify(body) : undefined,
     });
@@ -231,6 +232,55 @@ function handleLocalMockApi(path, method, body, userId) {
     item.distributed_at = new Date().toISOString();
     setStoredListings(listings);
     return item;
+  }
+
+  // POST /api/users/login
+  if (path === "/api/users/login" && method === "POST") {
+    const roleKey = body?.role || "donor";
+    const seed = SEED_USERS[roleKey] || SEED_USERS.donor;
+    return {
+      id: seed.id,
+      name: body?.name || seed.name,
+      role: roleKey,
+      org: body?.org || seed.org,
+    };
+  }
+
+  // POST /api/users
+  if (path === "/api/users" && method === "POST") {
+    return {
+      id: Date.now(),
+      name: body?.name || "New User",
+      role: body?.role || "donor",
+      org: body?.org || `${body?.name || "User"}'s Org`,
+    };
+  }
+
+  // GET /api/users
+  if (path === "/api/users" && method === "GET") {
+    return Object.values(SEED_USERS);
+  }
+
+  // GET /api/audits/summary
+  if (path.includes("/api/audits") && method === "GET") {
+    return {
+      verified_meals: 450,
+      total_kg: 180.0,
+      audits: 12,
+      recent: [
+        { audit_date: "2026-10-04", location: "Central Dining Hall", food_type: "Veg Meals", weight_kg: 40, meals_served: 100 },
+        { audit_date: "2026-10-03", location: "West Canteen", food_type: "Sandwiches", weight_kg: 15, meals_served: 37 },
+      ],
+    };
+  }
+
+  // GET /api/scores/leaderboard
+  if (path.includes("/api/scores/leaderboard") && method === "GET") {
+    return [
+      { name: "Courier Alex", best_points: 520, total_meals: 20.8, games: 6 },
+      { name: "Shelter Hero", best_points: 410, total_meals: 16.4, games: 4 },
+      { name: "Eco Champion", best_points: 350, total_meals: 14.0, games: 3 },
+    ];
   }
 
   // GET /api/impact/monthly or summary

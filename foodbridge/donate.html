@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donate Surplus Food | FoodBridge Zero Waste Network</title>
+  <meta name="description" content="Quickly post leftover edible food from canteens, restaurants, hotels, and events for immediate volunteer courier rescue.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- STICKY NAVBAR -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button id="mobile-menu-toggle" class="btn btn-icon mobile-toggle" aria-label="Toggle Navigation Menu">☰</button>
+        <a href="index.html" class="brand-logo" aria-label="FoodBridge Home">
+          <svg class="brand-icon" viewBox="0 0 64 64" fill="none">
+            <rect x="2" y="2" width="60" height="60" rx="18" fill="#2E7D4F" fill-opacity="0.15" stroke="#2E7D4F" stroke-width="1.5" />
+            <path d="M 10 48 Q 32 24 54 48" stroke="#2E7D4F" stroke-width="5" stroke-linecap="round" fill="none" />
+            <circle cx="32" cy="28" r="10" fill="#E4572E" />
+          </svg>
+          <span>FoodBridge</span>
+        </a>
+      </div>
+
+      <nav>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="index.html#home" class="nav-link">Home</a></li>
+          <li><a href="index.html#problem" class="nav-link">The Problem</a></li>
+          <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="index.html#impact" class="nav-link">Impact</a></li>
+          <li class="nav-dropdown-wrapper">
+            <a href="#" class="nav-link" aria-current="page" style="display:flex; align-items:center; gap:0.3rem;">
+              <span>Take Action</span> <span style="font-size:0.75rem;">▼</span>
+            </a>
+            <div class="nav-dropdown-menu">
+              <a href="donate.html" class="nav-dropdown-item" aria-current="page">👨‍🍳 Donate Surplus Food</a>
+              <a href="courier.html" class="nav-dropdown-item">🚴 Courier Portal</a>
+              <a href="ngo-hub.html" class="nav-dropdown-item">🏢 NGO Shelter Hub</a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <button id="theme-toggle" class="btn btn-icon" aria-label="Toggle Dark/Light Mode" title="Toggle Theme">
+          <span id="theme-icon">🌙</span>
+        </button>
+        <a href="portal.html" class="btn btn-primary btn-sm">🚀 Open Portal ➔</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- COMPACT HERO BANNER -->
+  <section class="compact-hero">
+    <div class="container compact-hero-content">
+      <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
+        <a href="index.html">Home</a> <span>/</span> <span>Take Action</span> <span>/</span> <span style="color:var(--primary); font-weight:700;">Donate Surplus Food</span>
+      </nav>
+      <h1 class="section-title">👨‍🍳 Donate Surplus Food</h1>
+      <p class="section-subtitle mx-auto">
+        List leftover edible meals from canteens, restaurants, hotels, and events for immediate volunteer courier rescue.
+      </p>
+
+      <!-- Rescue Chain Role Mini-Diagram -->
+      <div id="rescue-chain-diagram"></div>
+    </div>
+  </section>
+
+  <!-- MAIN DONATION SECTION -->
+  <main class="container" style="padding: 3.5rem 1.5rem;">
+    
+    <div style="max-width: 800px; margin: 0 auto;">
+      
+      <!-- Multi-Step Progress Stepper -->
+      <div class="stepper-bar" id="donor-stepper">
+        <div class="step-item active" id="step-node-1">
+          <div class="step-number">1</div>
+          <span class="step-label">Donor Info</span>
+        </div>
+        <div class="step-item" id="step-node-2">
+          <div class="step-number">2</div>
+          <span class="step-label">Food Details</span>
+        </div>
+        <div class="step-item" id="step-node-3">
+          <div class="step-number">3</div>
+          <span class="step-label">Expiry &amp; Pickup</span>
+        </div>
+        <div class="step-item" id="step-node-4">
+          <div class="step-number">4</div>
+          <span class="step-label">Review &amp; Consent</span>
+        </div>
+      </div>
+
+      <!-- MAIN MULTI-STEP FORM CARD -->
+      <div class="card" id="donor-form-card" style="margin-bottom: 3.5rem;">
+        <form id="donate-multi-form" onsubmit="event.preventDefault();">
+          
+          <!-- STEP 1: DONOR DETAILS -->
+          <div class="form-step-panel" id="form-step-1">
+            <h3 style="font-size:1.35rem; margin-bottom:1.25rem; color:var(--primary);">Step 1: Donor &amp; Facility Details</h3>
+            
+            <div class="form-group">
+              <label class="form-label" for="donor-type">Donor Organization Type *</label>
+              <select id="donor-type" class="form-control" required>
+                <option value="College Canteen">College Canteen / University Dining</option>
+                <option value="Restaurant / Cafe">Restaurant / Café / Bakery</option>
+                <option value="Hotel / Resort">Hotel / Resort Banquet</option>
+                <option value="Event / Caterer">Event / Wedding Caterer</option>
+                <option value="Household">Household / Neighborhood Group</option>
+                <option value="Other">Other Facility</option>
+              </select>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="donor-name">Organization / Facility Name *</label>
+                <input type="text" id="donor-name" class="form-control" required placeholder="e.g. Campus Central Canteen">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contact-person">Contact Person Name *</label>
+                <input type="text" id="contact-person" class="form-control" required placeholder="e.g. Chef Robert">
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="donor-phone">Phone Number *</label>
+                <input type="tel" id="donor-phone" class="form-control" required placeholder="+1 (555) 019-2831">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="donor-email">Email Address *</label>
+                <input type="email" id="donor-email" class="form-control" required placeholder="canteen@campus.edu">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="pickup-address">Pickup Full Address *</label>
+              <textarea id="pickup-address" class="form-control" rows="2" required placeholder="Building name, street, gate number, city"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="landmark">Landmark / Specific Loading Dock</label>
+              <input type="text" id="landmark" class="form-control" placeholder="e.g. Behind Central Library Gate 2">
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:1.5rem;">
+              <button type="button" class="btn btn-primary" onclick="goToStep(2)">Next: Food Details ➔</button>
+            </div>
+          </div>
+
+          <!-- STEP 2: FOOD DETAILS -->
+          <div class="form-step-panel" id="form-step-2" style="display:none;">
+            <h3 style="font-size:1.35rem; margin-bottom:1.25rem; color:var(--primary);">Step 2: Food &amp; Packaging Information</h3>
+
+            <div class="form-group">
+              <label class="form-label">Food Item Name(s) *</label>
+              <div id="food-items-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:0.5rem;">
+                <input type="text" class="form-control food-item-input" required placeholder="e.g. 50 Servings Fresh Veg Curry & Steamed Rice">
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="addFoodItemInput()">+ Add Another Item</button>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="food-category">Dietary Category *</label>
+                <select id="food-category" class="form-control">
+                  <option value="Veg">Vegetarian</option>
+                  <option value="Non-veg">Non-Vegetarian</option>
+                  <option value="Vegan">Vegan</option>
+                  <option value="Mixed">Mixed / Assorted</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="food-type">Food Type *</label>
+                <select id="food-type" class="form-control">
+                  <option value="Cooked">Cooked Meals</option>
+                  <option value="Packaged">Packaged Goods</option>
+                  <option value="Raw produce">Raw Fruits / Produce</option>
+                  <option value="Bakery">Bakery &amp; Bread</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="quantity-num">Quantity Count *</label>
+                <input type="number" id="quantity-num" class="form-control" min="1" value="30" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="quantity-unit">Unit *</label>
+                <select id="quantity-unit" class="form-control">
+                  <option value="servings">Servings / Meals</option>
+                  <option value="kg">Kilograms (kg)</option>
+                  <option value="packets">Packets / Boxes</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="packaging-type">Packaging Type</label>
+                <input type="text" id="packaging-type" class="form-control" placeholder="e.g. Sanitized Stainless Steel Tubs">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="storage-needs">Storage Requirement</label>
+                <select id="storage-needs" class="form-control">
+                  <option value="Room temp">Room Temperature</option>
+                  <option value="Hot">Keep Hot (Above 60°C)</option>
+                  <option value="Cold">Refrigerated (Below 5°C)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Allergens Present (Select all that apply)</label>
+              <div style="display:flex; flex-wrap:wrap; gap:1rem; margin-top:0.35rem;">
+                <label style="font-size:0.9rem;"><input type="checkbox" name="allergens" value="dairy"> Dairy</label>
+                <label style="font-size:0.9rem;"><input type="checkbox" name="allergens" value="gluten"> Gluten</label>
+                <label style="font-size:0.9rem;"><input type="checkbox" name="allergens" value="nuts"> Nuts</label>
+                <label style="font-size:0.9rem;"><input type="checkbox" name="allergens" value="egg"> Egg</label>
+                <label style="font-size:0.9rem;"><input type="checkbox" name="allergens" value="soy"> Soy</label>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:1.5rem;">
+              <button type="button" class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+              <button type="button" class="btn btn-primary" onclick="goToStep(3)">Next: Expiry &amp; Timing ➔</button>
+            </div>
+          </div>
+
+          <!-- STEP 3: TIMING & EXPIRY -->
+          <div class="form-step-panel" id="form-step-3" style="display:none;">
+            <h3 style="font-size:1.35rem; margin-bottom:1.25rem; color:var(--primary);">Step 3: Preparation &amp; Live Expiry Timers</h3>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="prepared-time">Time Food Was Prepared *</label>
+                <input type="datetime-local" id="prepared-time" class="form-control" required onchange="updateExpiryRingPreview()">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="expires-time">Safe-to-Consume Until (Expiry) *</label>
+                <input type="datetime-local" id="expires-time" class="form-control" required onchange="updateExpiryRingPreview()">
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="pickup-start">Pickup Window Start *</label>
+                <input type="datetime-local" id="pickup-start" class="form-control" required onchange="updateExpiryRingPreview()">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="pickup-end">Pickup Window End *</label>
+                <input type="datetime-local" id="pickup-end" class="form-control" required onchange="updateExpiryRingPreview()">
+              </div>
+            </div>
+
+            <!-- LIVE EXPIRY COUNTDOWN RING PREVIEW CARD -->
+            <div class="card" style="background:var(--bg-subtle); padding:1.25rem; border-radius:var(--radius-md); margin:1.5rem 0;">
+              <h4 style="font-size:1rem; margin-bottom:0.75rem; color:var(--text-dark);">Live Expiry Ring Preview</h4>
+              <div style="display:flex; align-items:center; gap:1.25rem;">
+                <svg class="expiry-ring-svg" viewBox="0 0 60 60">
+                  <circle class="expiry-ring-bg" cx="30" cy="30" r="25" />
+                  <circle id="preview-ring-progress" class="expiry-ring-progress" cx="30" cy="30" r="25" stroke="#2E7D4F" stroke-dasharray="157" stroke-dashoffset="30" />
+                </svg>
+                <div>
+                  <div id="preview-expiry-text" style="font-family:var(--font-heading); font-size:1.2rem; font-weight:800; color:var(--primary);">3h 45m left</div>
+                  <div id="preview-expiry-warning" style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Pickup window is safe and active.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label style="font-weight:700; font-size:0.95rem; display:flex; align-items:center; gap:0.5rem;">
+                <input type="checkbox" id="recurring-toggle"> Recurring Daily Surplus?
+              </label>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:1.5rem;">
+              <button type="button" class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
+              <button type="button" class="btn btn-primary" onclick="goToStep(4)">Next: Review &amp; Consent ➔</button>
+            </div>
+          </div>
+
+          <!-- STEP 4: REVIEW & CONSENT -->
+          <div class="form-step-panel" id="form-step-4" style="display:none;">
+            <h3 style="font-size:1.35rem; margin-bottom:1.25rem; color:var(--primary);">Step 4: Review &amp; Food Safety Consent</h3>
+
+            <div class="card" style="background:var(--bg-subtle); padding:1.25rem; margin-bottom:1.5rem;" id="review-summary-card">
+              <!-- Rendered via JS -->
+            </div>
+
+            <div class="form-group" style="background:rgba(246,166,35,0.12); padding:1rem; border-radius:var(--radius-md); border:1px solid rgba(246,166,35,0.3);">
+              <label style="font-weight:700; font-size:0.9rem; color:var(--text-dark); display:flex; gap:0.6rem; align-items:flex-start;">
+                <input type="checkbox" id="food-safety-consent" required style="margin-top:0.2rem;">
+                <span>I confirm that this food is fresh, hygienically prepared, safe to eat, and handled according to food safety standards. *</span>
+              </label>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:1.5rem;">
+              <button type="button" class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+              <button type="button" class="btn btn-primary" onclick="submitDonorForm()">🚀 Post Surplus Listing Now ➔</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- SUCCESS SCREEN (SHOWN AFTER SUBMIT) -->
+      <div class="card" id="donor-success-card" style="display:none; text-align:center; padding:3rem 2rem; margin-bottom:3.5rem;">
+        <div style="width:72px; height:72px; border-radius:50%; background:var(--primary-alpha); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:2.5rem; margin:0 auto 1.25rem;">
+          🎉
+        </div>
+        <span class="section-tag">Listing Active</span>
+        <h2 style="font-size:2rem; margin-bottom:0.5rem; color:var(--text-dark);">Surplus Food Listing Posted!</h2>
+        <p style="font-size:1rem; color:var(--text-muted); max-width:540px; margin:0 auto 1.5rem;">
+          Your listing has been assigned ID <strong id="success-listing-id" style="color:var(--primary);">FB-2026-0046</strong> and alert notifications have been dispatched to nearby couriers.
+        </p>
+        <div id="success-status-badge" style="margin-bottom:2rem;"></div>
+
+        <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="resetDonorForm()">👨‍🍳 Donate Another Item</button>
+          <a href="#live-surplus-board" class="btn btn-secondary">📋 View Live Board ➔</a>
+        </div>
+      </div>
+
+      <!-- LIVE SURPLUS BOARD -->
+      <section id="live-surplus-board" style="margin-bottom: 4rem;">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1.5rem;">
+          <div>
+            <span class="section-tag">Real-Time Listings</span>
+            <h2 style="font-size:1.75rem;">Live Surplus Board</h2>
+          </div>
+          
+          <!-- Filters -->
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <select id="filter-category" class="form-control" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem;" onchange="renderLiveBoard()">
+              <option value="">All Categories</option>
+              <option value="Veg">Vegetarian</option>
+              <option value="Non-veg">Non-Veg</option>
+              <option value="Vegan">Vegan</option>
+            </select>
+            <select id="filter-urgency" class="form-control" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem;" onchange="renderLiveBoard()">
+              <option value="">All Urgencies</option>
+              <option value="urgent">Urgent (&lt; 2 hours)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="live-board-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:1.25rem;">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- FOOD SAFETY TIPS ACCORDION -->
+      <section style="margin-bottom: 4rem;">
+        <span class="section-tag">Safety Guidelines</span>
+        <h2 style="font-size:1.75rem; margin-bottom:1.25rem;">Food Safety Tips for Donors</h2>
+
+        <div class="accordion-item active">
+          <button class="accordion-header" onclick="this.parentElement.classList.toggle('active')">
+            <span>🌡️ Temperature Controls (Hot &amp; Cold Storage)</span>
+            <span>▼</span>
+          </button>
+          <div class="accordion-body">
+            Keep cooked hot meals above 60°C (140°F) or rapidly chill below 5°C (41°F) within 2 hours of preparation. Never leave perishable cooked food at room temperature for over 2 hours.
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-header" onclick="this.parentElement.classList.toggle('active')">
+            <span>📦 Clean Packaging &amp; Labeling</span>
+            <span>▼</span>
+          </button>
+          <div class="accordion-body">
+            Use clean, food-grade containers or foil wrapping. Clearly write the preparation time and any major allergens (nuts, dairy, gluten) on the package cover.
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-header" onclick="this.parentElement.classList.toggle('active')">
+            <span>⌛ Realistic Expiry Timers</span>
+            <span>▼</span>
+          </button>
+          <div class="accordion-body">
+            Set safe-to-consume windows accurately. If food was prepared 3 hours ago, set the expiry window within the next 2-3 hours so couriers can complete delivery before expiry.
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- REUSABLE FOOTER -->
+  <footer style="background:var(--bg-surface); border-top:1px solid var(--border-color); padding:3rem 0; text-align:center;">
+    <div class="container">
+      <div style="max-width:200px; margin:0 auto 1.5rem;">
+        <svg viewBox="0 0 240 120" width="160" height="80">
+          <ellipse cx="120" cy="40" rx="90" ry="20" fill="#8C652D"/>
+          <path d="M30 40 C30 90, 60 110, 120 110 C180 110, 210 90, 210 40 Z" fill="#A67C3D"/>
+        </svg>
+      </div>
+      <p style="font-weight:700; font-size:1.1rem; color:var(--text-dark); margin-bottom:0.5rem;">🌿 FoodBridge Zero Food Waste Initiative</p>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">
+        Demo Mode Active &bull; LocalStorage State Synchronization
+      </p>
+      <button class="btn btn-secondary btn-sm" onclick="FoodBridgeApp.resetDemoData()">🔄 Reset Demo Data</button>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    let currentStep = 1;
+
+    function goToStep(stepNum) {
+      document.querySelectorAll('.form-step-panel').forEach(p => p.style.display = 'none');
+      document.getElementById(`form-step-${stepNum}`).style.display = 'block';
+
+      document.querySelectorAll('.step-item').forEach((item, idx) => {
+        item.classList.remove('active', 'completed');
+        if (idx + 1 === stepNum) item.classList.add('active');
+        else if (idx + 1 < stepNum) item.classList.add('completed');
+      });
+
+      currentStep = stepNum;
+      if (stepNum === 3) updateExpiryRingPreview();
+      if (stepNum === 4) renderReviewSummary();
+    }
+
+    function addFoodItemInput() {
+      const container = document.getElementById('food-items-list');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'form-control food-item-input';
+      input.placeholder = 'Another surplus dish (e.g. 20 Portions Salad)';
+      container.appendChild(input);
+    }
+
+    function updateExpiryRingPreview() {
+      const expInput = document.getElementById('expires-time').value;
+      const ring = document.getElementById('preview-ring-progress');
+      const text = document.getElementById('preview-expiry-text');
+      const warn = document.getElementById('preview-expiry-warning');
+
+      if (!expInput) return;
+      const metrics = FoodBridgeApp.calculateExpiryRing(expInput);
+      if (ring) {
+        ring.setAttribute('stroke', metrics.color);
+        ring.setAttribute('stroke-dashoffset', metrics.dashOffset);
+      }
+      if (text) {
+        text.innerText = metrics.text;
+        text.style.color = metrics.color;
+      }
+      if (warn) {
+        warn.innerText = metrics.isExpired ? '⚠️ Warning: Expiry time is in the past!' : 'Pickup window is safe and active.';
+      }
+    }
+
+    function renderReviewSummary() {
+      const name = document.getElementById('donor-name').value || 'Anonymous';
+      const items = Array.from(document.querySelectorAll('.food-item-input')).map(i => i.value).filter(Boolean).join(', ');
+      const qty = document.getElementById('quantity-num').value;
+      const unit = document.getElementById('quantity-unit').value;
+      const address = document.getElementById('pickup-address').value;
+
+      document.getElementById('review-summary-card').innerHTML = `
+        <h4 style="font-size:1.1rem; color:var(--primary); margin-bottom:0.75rem;">Listing Summary Review</h4>
+        <div style="font-size:0.9rem; display:flex; flex-direction:column; gap:0.4rem;">
+          <div><strong>Donor:</strong> ${name}</div>
+          <div><strong>Surplus Items:</strong> ${items || 'Cooked Meals'}</div>
+          <div><strong>Quantity:</strong> ${qty} ${unit}</div>
+          <div><strong>Pickup Address:</strong> ${address}</div>
+        </div>
+      `;
+    }
+
+    function submitDonorForm() {
+      const consent = document.getElementById('food-safety-consent').checked;
+      if (!consent) {
+        FoodBridgeApp.showToast('Please check the food safety consent box to proceed.', 'warning');
+        return;
+      }
+
+      const items = Array.from(document.querySelectorAll('.food-item-input')).map(i => i.value).filter(Boolean).join(', ');
+      const newListing = FoodBridgeApp.addListing({
+        title: items || 'Surplus Cooked Meals',
+        donorType: document.getElementById('donor-type').value,
+        donorName: document.getElementById('donor-name').value,
+        contactPerson: document.getElementById('contact-person').value,
+        phone: document.getElementById('donor-phone').value,
+        email: document.getElementById('donor-email').value,
+        address: document.getElementById('pickup-address').value,
+        landmark: document.getElementById('landmark').value,
+        foodCategory: document.getElementById('food-category').value,
+        foodType: document.getElementById('food-type').value,
+        quantity: document.getElementById('quantity-num').value,
+        unit: document.getElementById('quantity-unit').value,
+        packaging: document.getElementById('packaging-type').value,
+        storage: document.getElementById('storage-needs').value,
+        preparedAt: document.getElementById('prepared-time').value,
+        expiresAt: document.getElementById('expires-time').value,
+        pickupStart: document.getElementById('pickup-start').value,
+        pickupEnd: document.getElementById('pickup-end').value,
+        recurring: document.getElementById('recurring-toggle').checked,
+        consent: true
+      });
+
+      document.getElementById('donor-form-card').style.display = 'none';
+      document.getElementById('donor-stepper').style.display = 'none';
+      document.getElementById('success-listing-id').innerText = newListing.id;
+      document.getElementById('success-status-badge').innerHTML = FoodBridgeApp.getStatusBadgeHtml(newListing.status);
+      document.getElementById('donor-success-card').style.display = 'block';
+
+      renderLiveBoard();
+    }
+
+    function resetDonorForm() {
+      document.getElementById('donate-multi-form').reset();
+      document.getElementById('donor-form-card').style.display = 'block';
+      document.getElementById('donor-stepper').style.display = 'flex';
+      document.getElementById('donor-success-card').style.display = 'none';
+      goToStep(1);
+    }
+
+    function renderLiveBoard() {
+      const cat = document.getElementById('filter-category').value;
+      const urg = document.getElementById('filter-urgency').value;
+      const listings = FoodBridgeApp.getListings({ category: cat, urgency: urg });
+      const grid = document.getElementById('live-board-grid');
+
+      if (!grid) return;
+      if (listings.length === 0) {
+        grid.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center;">No listings matched the filter criteria.</div>`;
+        return;
+      }
+
+      grid.innerHTML = listings.map(item => {
+        const ring = FoodBridgeApp.calculateExpiryRing(item.expiresAt);
+        const badge = FoodBridgeApp.getStatusBadgeHtml(item.status);
+        return `
+          <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+                ${badge}
+                <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted);">${item.id}</span>
+              </div>
+              <h3 style="font-size:1.15rem; margin-bottom:0.4rem; color:var(--text-dark);">${item.title}</h3>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem;">
+                📍 ${item.address} &bull; 📦 ${item.quantity} ${item.unit}
+              </p>
+            </div>
+
+            <div style="border-top:1px solid var(--border-color); padding-top:0.75rem; display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <svg class="expiry-ring-svg" viewBox="0 0 60 60" style="width:36px; height:36px;">
+                  <circle class="expiry-ring-bg" cx="30" cy="30" r="25"/>
+                  <circle class="expiry-ring-progress" cx="30" cy="30" r="25" stroke="${ring.color}" stroke-dasharray="157" stroke-dashoffset="${ring.dashOffset}"/>
+                </svg>
+                <span style="font-size:0.8rem; font-weight:700; color:${ring.color};">${ring.text}</span>
+              </div>
+              ${item.status === 'available' ? `<button class="btn btn-secondary btn-sm" onclick="FoodBridgeApp.cancelListing('${item.id}'); renderLiveBoard();">Cancel</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Set default datetimes
+    document.addEventListener('DOMContentLoaded', () => {
+      const now = new Date();
+      const in4h = new Date(now.getTime() + 4 * 3600 * 1000);
+      const toISO = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+
+      document.getElementById('prepared-time').value = toISO(now);
+      document.getElementById('expires-time').value = toISO(in4h);
+      document.getElementById('pickup-start').value = toISO(now);
+      document.getElementById('pickup-end').value = toISO(in4h);
+
+      renderLiveBoard();
+    });
+  </script>
+</body>
+</html>

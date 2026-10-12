@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Mail, Lock, User, Building, ShieldCheck, X, Sparkles, KeyRound } from "lucide-react";
+import { apiCall } from "../services/api";
 
 export function AuthModal({ isOpen, onClose, onAuthenticate, toast }) {
   const [tab, setTab] = useState("login"); // "login" | "register" | "quick"
@@ -42,7 +43,7 @@ export function AuthModal({ isOpen, onClose, onAuthenticate, toast }) {
     },
   ];
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!loginEmail.trim() || !loginEmail.includes("@")) {
       toast("Please enter a valid email address.", "error");
@@ -52,20 +53,29 @@ export function AuthModal({ isOpen, onClose, onAuthenticate, toast }) {
     const name = loginEmail.split("@")[0].replace(/[._]/g, " ");
     const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
 
-    const authenticatedUser = {
-      id: loginRole === "donor" ? 1 : loginRole === "volunteer" ? 2 : 3,
-      email: loginEmail.trim().toLowerCase(),
-      name: formattedName,
-      role: loginRole,
-      org: loginRole === "donor" ? "Campus Food Donor" : loginRole === "volunteer" ? "Rescue Courier" : "Community NGO",
-    };
+    try {
+      const user = await apiCall("/api/users/login", {
+        method: "POST",
+        body: { name: formattedName, role: loginRole },
+      });
 
-    onAuthenticate(authenticatedUser);
-    toast(`Authenticated as ${authenticatedUser.email} (${authenticatedUser.role.toUpperCase()})`, "success");
-    onClose();
+      const authenticatedUser = {
+        id: user.id || (loginRole === "donor" ? 1 : loginRole === "volunteer" ? 2 : 3),
+        email: loginEmail.trim().toLowerCase(),
+        name: user.name || formattedName,
+        role: user.role || loginRole,
+        org: user.org || (loginRole === "donor" ? "Campus Food Donor" : loginRole === "volunteer" ? "Rescue Courier" : "Community NGO"),
+      };
+
+      onAuthenticate(authenticatedUser);
+      toast(`Authenticated as ${authenticatedUser.email} (${authenticatedUser.role.toUpperCase()})`, "success");
+      onClose();
+    } catch (err) {
+      toast(err.message || "Authentication failed", "error");
+    }
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (!regName.trim()) {
       toast("Please enter your full name.", "error");
@@ -76,23 +86,53 @@ export function AuthModal({ isOpen, onClose, onAuthenticate, toast }) {
       return;
     }
 
-    const newUser = {
-      id: `usr_${Date.now().toString().slice(-4)}`,
-      email: regEmail.trim().toLowerCase(),
-      name: regName.trim(),
-      role: regRole,
-      org: regOrg.trim() || `${regName}'s Organization`,
-    };
+    try {
+      const user = await apiCall("/api/users", {
+        method: "POST",
+        body: {
+          name: regName.trim(),
+          role: regRole,
+          org: regOrg.trim() || `${regName.trim()}'s Organization`,
+        },
+      });
 
-    onAuthenticate(newUser);
-    toast(`Account created! Welcome, ${newUser.name} (${newUser.role.toUpperCase()})`, "success");
-    onClose();
+      const newUser = {
+        id: user.id || `usr_${Date.now().toString().slice(-4)}`,
+        email: regEmail.trim().toLowerCase(),
+        name: user.name || regName.trim(),
+        role: user.role || regRole,
+        org: user.org || regOrg.trim() || `${regName}'s Organization`,
+      };
+
+      onAuthenticate(newUser);
+      toast(`Account created! Welcome, ${newUser.name} (${newUser.role.toUpperCase()})`, "success");
+      onClose();
+    } catch (err) {
+      toast(err.message || "Registration failed", "error");
+    }
   };
 
-  const handleQuickSelect = (acc) => {
-    onAuthenticate(acc);
-    toast(`Signed in with demo email: ${acc.email}`, "success");
-    onClose();
+  const handleQuickSelect = async (acc) => {
+    try {
+      const user = await apiCall("/api/users/login", {
+        method: "POST",
+        body: { name: acc.name, role: acc.role, org: acc.org },
+      });
+      const authenticatedUser = {
+        ...acc,
+        id: user.id || acc.id,
+        name: user.name || acc.name,
+        role: user.role || acc.role,
+        org: user.org || acc.org,
+      };
+      onAuthenticate(authenticatedUser);
+      toast(`Signed in with demo email: ${acc.email}`, "success");
+      onClose();
+    } catch (_err) {
+      onAuthenticate(acc);
+      toast(`Signed in with demo email: ${acc.email}`, "success");
+      onClose();
+    }
   };
 
   return (
