@@ -2,9 +2,10 @@ import { pool } from "../config/db.js";
 
 const ROLES = ["donor", "volunteer", "ngo"];
 
-// DEMO AUTH: the client sends x-user-id. Replace with real login (JWT/OAuth) before production.
+// DEMO AUTH: the client sends x-user-id and optional x-user-role. Replace with real login (JWT/OAuth) before production.
 export async function attachUser(req, _res, next) {
   const rawId = req.get("x-user-id");
+  const rawRole = req.get("x-user-role");
   let id = Number(rawId);
 
   if (isNaN(id) && typeof rawId === "string") {
@@ -22,13 +23,14 @@ export async function attachUser(req, _res, next) {
     req.user = rows[0] ?? null;
   }
 
-  if (!req.user && rawId) {
-    if (String(rawId).includes("101") || String(rawId).includes("donor")) {
-      req.user = { id: 1, name: "Campus Canteen Manager", role: "donor", org: "Green Valley Dining Hall" };
-    } else if (String(rawId).includes("201") || String(rawId).includes("volunteer")) {
-      req.user = { id: 2, name: "Courier Alex", role: "volunteer", org: "Swift Rescue Network" };
-    } else if (String(rawId).includes("301") || String(rawId).includes("ngo")) {
-      req.user = { id: 3, name: "Hope Shelter Staff", role: "ngo", org: "Hope Shelter Kitchen" };
+  if (!req.user) {
+    const role = rawRole || (String(rawId).includes("volunteer") || String(rawId).includes("201") ? "volunteer" : String(rawId).includes("ngo") || String(rawId).includes("301") ? "ngo" : "donor");
+    if (role === "volunteer") {
+      req.user = { id: id || 2, name: "Courier Alex", role: "volunteer", org: "Swift Rescue Network" };
+    } else if (role === "ngo") {
+      req.user = { id: id || 3, name: "Hope Shelter Staff", role: "ngo", org: "Hope Shelter Kitchen" };
+    } else {
+      req.user = { id: id || 1, name: "Campus Canteen Manager", role: "donor", org: "Green Valley Dining Hall" };
     }
   }
 
@@ -80,7 +82,7 @@ export async function loginUser(req, res) {
       return res.status(201).json(newRows[0]);
     }
 
-    return res.status(444 || 404).json({ error: "Account not found. Please register or select your role to sign up." });
+    return res.status(404).json({ error: "Account not found. Please register or select your role to sign up." });
   } catch (err) {
     res.status(500).json({ error: "Login failed: " + err.message });
   }

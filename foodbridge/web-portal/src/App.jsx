@@ -39,6 +39,13 @@ export function App() {
   // Sync role selection with current user
   const handleRoleChange = (role) => {
     setActiveRole(role);
+    if (currentUser) {
+      const updatedUser = { ...currentUser, role };
+      setCurrentUser(updatedUser);
+      try {
+        localStorage.setItem("fb_auth_user", JSON.stringify(updatedUser));
+      } catch (_e) {}
+    }
     if (role === "donor") setActiveTab("donor_form");
     else if (role === "volunteer") setActiveTab("board");
     else if (role === "ngo") setActiveTab("distribution");
@@ -64,11 +71,12 @@ export function App() {
   const fetchData = useCallback(async () => {
     setIsRefreshing(true);
     const userId = currentUser?.id || "usr_101";
+    const userRole = currentUser?.role || activeRole || "donor";
     try {
       const [listData, impactSummary, myOrgSummary] = await Promise.all([
-        apiCall("/api/listings", { userId }),
-        apiCall("/api/impact/summary", { userId }),
-        apiCall(`/api/impact/monthly?donorId=${userId}`, { userId }),
+        apiCall("/api/listings", { userId, userRole }),
+        apiCall("/api/impact/summary", { userId, userRole }),
+        apiCall(`/api/impact/monthly?donorId=${userId}`, { userId, userRole }),
       ]);
 
       if (Array.isArray(listData)) {
@@ -81,7 +89,7 @@ export function App() {
     } finally {
       setIsRefreshing(false);
     }
-  }, [currentUser?.id, triggerToast]);
+  }, [currentUser?.id, currentUser?.role, activeRole, triggerToast]);
 
   // Real-time client logic: Background data re-fetch every 60 seconds
   useEffect(() => {
@@ -96,15 +104,14 @@ export function App() {
 
   // Donor post action
   const handlePostListing = async (formData) => {
-    if (!currentUser) {
-      setIsAuthOpen(true);
-      triggerToast("Please authenticate with email before posting.", "error");
-      return;
-    }
+    const activeUser = currentUser || { id: 1, name: "Campus Canteen Manager", role: "donor", org: "Green Valley Dining Hall" };
+    const effectiveRole = activeUser.role === "donor" ? "donor" : activeRole === "donor" ? "donor" : activeUser.role;
+
     await apiCall("/api/listings", {
       method: "POST",
       body: formData,
-      userId: currentUser.id,
+      userId: activeUser.id,
+      userRole: effectiveRole,
     });
     await fetchData();
   };
@@ -120,6 +127,7 @@ export function App() {
       await apiCall(`/api/listings/${id}/${act}`, {
         method: "POST",
         userId: currentUser.id,
+        userRole: currentUser.role || activeRole,
       });
       triggerToast(
         act === "claim"
@@ -206,7 +214,115 @@ export function App() {
               Sign In with Email
             </button>
           </div>
-        )}
+        {/* Role-Based Operational Step-by-Step Guidance Banner */}
+        <div className="glass-panel rounded-2xl p-5 border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-slate-900/60 to-slate-950/80 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-extrabold text-sm">
+                {activeRole === "donor" ? "👨‍🍳" : activeRole === "volunteer" ? "🚴" : "🏢"}
+              </div>
+              <div>
+                <h2 className="text-sm font-extrabold text-white flex items-center gap-2">
+                  <span>Welcome, {currentUser ? currentUser.name : "Guest User"}!</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    {activeRole === "donor" ? "Food Donor Workflow" : activeRole === "volunteer" ? "Volunteer Courier Workflow" : "NGO Shelter Workflow"}
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {currentUser ? `Account: ${currentUser.email || currentUser.id} • ${currentUser.org}` : "Follow the 3 operational steps below to complete your food rescue session."}
+                </p>
+              </div>
+            </div>
+            
+            <a
+              href="index.html"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-center"
+            >
+              <span>🏠 Landing Page</span>
+            </a>
+          </div>
+
+          {/* 3 Step Process Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {activeRole === "donor" && (
+              <>
+                <div className={`p-3.5 rounded-xl border transition-all ${activeTab === "donor_form" ? "bg-emerald-500/15 border-emerald-500/50" : "bg-slate-900/60 border-slate-800 opacity-75"}`}>
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 mb-1">
+                    <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">1</span>
+                    <span>Post Surplus Meals</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Fill in title, meal count, pickup address, and set live expiry timer.</p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 opacity-75">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-300 mb-1">
+                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">2</span>
+                    <span>Courier Pickup Dispatch</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Automated notification alerts nearby volunteer couriers instantly.</p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 opacity-75">
+                  <div className="flex items-center gap-2 text-xs font-bold text-sky-300 mb-1">
+                    <span className="w-5 h-5 rounded-full bg-sky-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">3</span>
+                    <span>Track Environmental Impact</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">View diverted meals, kg waste saved, and CO₂ offset analytics.</p>
+                </div>
+              </>
+            )}
+
+            {activeRole === "volunteer" && (
+              <>
+                <div className={`p-3.5 rounded-xl border transition-all ${activeTab === "board" ? "bg-amber-500/15 border-amber-500/50" : "bg-slate-900/60 border-slate-800 opacity-75"}`}>
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-300 mb-1">
+                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">1</span>
+                    <span>Check Expiry Countdown</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Filter active listings on the Urgent Board by ticking time windows.</p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 opacity-75">
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 mb-1">
+                    <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">2</span>
+                    <span>Claim Rescue Pickup</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Click "Claim Pickup" to reserve urgent food parcels for transit.</p>
+                </div>
+                <div className={`p-3.5 rounded-xl border transition-all ${activeTab === "my_pickups" ? "bg-amber-500/15 border-amber-500/50" : "bg-slate-900/60 border-slate-800 opacity-75"}`}>
+                  <div className="flex items-center gap-2 text-xs font-bold text-sky-300 mb-1">
+                    <span className="w-5 h-5 rounded-full bg-sky-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">3</span>
+                    <span>Collect &amp; Deliver to NGO</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Mark collected from donor, transport, and hand over to NGO shelter.</p>
+                </div>
+              </>
+            )}
+
+            {activeRole === "ngo" && (
+              <>
+                <div className={`p-3.5 rounded-xl border transition-all ${activeTab === "distribution" ? "bg-purple-500/15 border-purple-500/50" : "bg-slate-900/60 border-slate-800 opacity-75"}`}>
+                  <div className="flex items-center gap-2 text-xs font-bold text-purple-300 mb-1">
+                    <span className="w-5 h-5 rounded-full bg-purple-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">1</span>
+                    <span>Monitor Incoming Shipments</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">View collected meals arriving at your community shelter hub.</p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 opacity-75">
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 mb-1">
+                    <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">2</span>
+                    <span>Confirm Meal Distribution</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Confirm receipt to feed families and complete rescue transaction.</p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 opacity-75">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-300 mb-1">
+                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">3</span>
+                    <span>Community Audit Verified</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Meals logged into official community verification ledger.</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
 
         {/* Environmental & Carbon Impact Analytics Section */}
         <ImpactStats

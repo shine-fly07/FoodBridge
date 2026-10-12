@@ -1,16 +1,3357 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FoodBridge | Surplus Food Rescue Network</title>
-    <meta name="description" content="Production-ready Volunteer & Food Donor Web Portal for real-time surplus food logistics and expiry synchronization." />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-slate-950 text-slate-100 antialiased font-sans">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodBridge — Rescue food. Bridge the gap.</title>
+  <meta name="description" content="FoodBridge connects surplus food from canteens, restaurants, and households with volunteers and NGOs to reduce food waste.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       1. DESIGN SYSTEM & CSS VARIABLES
+       ========================================================================== */
+    :root {
+      --primary: #059669;
+      --primary-light: #10B981;
+      --primary-dark: #047857;
+      --primary-glow: rgba(16, 185, 129, 0.28);
+      
+      --accent-mango: #F59E0B;
+      --accent-mango-hover: #D97706;
+      --accent-cyan: #06B6D4;
+      --accent-cyan-light: #67E8F9;
+      --accent-tomato: #F43F5E;
+      --accent-tomato-light: #FB7185;
+      
+      --bg-cream: #F8FAFC;
+      --bg-surface: #FFFFFF;
+      --bg-surface-translucent: rgba(255, 255, 255, 0.88);
+      --bg-subtle: #F1F5F9;
+      
+      --text-dark: #0F172A;
+      --text-muted: #475569;
+      --text-light: #64748B;
+      
+      --border-color: rgba(15, 23, 42, 0.08);
+      --border-glow: rgba(16, 185, 129, 0.35);
+      --border-focus: #10B981;
+      
+      --bamboo-light: #E3C792;
+      --bamboo-mid: #C9A66B;
+      --bamboo-dark: #A67C3D;
+      --bamboo-shadow: rgba(166, 124, 61, 0.25);
+      
+      --font-heading: 'Fredoka', cursive, sans-serif;
+      --font-body: 'Nunito', sans-serif;
+      
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-full: 9999px;
+      
+      --shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.12);
+      --shadow-glow: 0 0 30px rgba(16, 185, 129, 0.3);
+      --shadow-inner: inset 0 2px 4px rgba(0,0,0,0.06);
+      
+      --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg-cream: #0B132B;
+      --bg-surface: #1C2541;
+      --bg-surface-translucent: rgba(15, 23, 42, 0.85);
+      --bg-subtle: #162032;
+      
+      --text-dark: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-light: #64748B;
+      
+      --border-color: rgba(255, 255, 255, 0.1);
+      --border-glow: rgba(52, 211, 153, 0.45);
+      --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 35px rgba(16, 185, 129, 0.4);
+    }
+
+    /* ==========================================================================
+       2. BASE & RESET
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-cream);
+      color: var(--text-dark);
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+      transition: background-color var(--transition-normal), color var(--transition-normal);
+    }
+
+    /* Focus styling */
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 3px solid var(--accent-mango);
+      outline-offset: 3px;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      line-height: 1.25;
+      color: var(--text-dark);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img, svg {
+      display: block;
+      max-width: 100%;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Section Styling */
+    section {
+      padding: 5rem 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      background-color: rgba(46, 125, 79, 0.12);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.875rem;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 1.25rem;
+      color: var(--text-dark);
+    }
+
+    .section-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin-bottom: 3rem;
+    }
+
+    .text-center { text-align: center; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+
+    /* Button System */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.85rem 1.75rem;
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition-bounce);
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-accent {
+      background-color: var(--accent-mango);
+      color: var(--text-dark);
+      border-color: var(--accent-mango);
+    }
+
+    .btn-accent:hover {
+      background-color: var(--accent-mango-hover);
+      border-color: var(--accent-mango-hover);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(46, 125, 79, 0.08);
+      transform: translateY(-3px);
+    }
+
+    .btn-icon {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+    }
+
+    .btn-icon:hover {
+      background: var(--bg-subtle);
+      transform: scale(1.1);
+    }
+
+    /* Wave / Curved Section Dividers */
+    .divider-wave {
+      width: 100%;
+      height: 60px;
+      color: var(--bg-cream);
+      margin-top: -60px;
+      position: relative;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .divider-wave-alt {
+      color: var(--bg-subtle);
+    }
+
+    /* Card Base */
+    .card {
+      background-color: var(--bg-surface-translucent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition-bounce), box-shadow var(--transition-normal), border-color var(--transition-normal);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(46, 125, 79, 0.3);
+    }
+
+    /* ==========================================================================
+       3. SIGNATURE INTERACTION: FALLING FOOD & DYNAMIC MOVING BASKET
+       ========================================================================== */
+    #falling-food-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .falling-item {
+      position: absolute;
+      top: -60px;
+      left: 0;
+      width: 42px;
+      height: 42px;
+      will-change: transform, opacity;
+      pointer-events: none;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.12));
+    }
+
+    /* Plus One Floating Counter Popup */
+    .plus-one-popup {
+      position: fixed;
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--bg-surface);
+      border: 2px solid var(--accent-mango);
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-md);
+      pointer-events: none;
+      z-index: 1001;
+      animation: floatUpFade 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) FORWARD;
+    }
+
+    @keyframes floatUpFade {
+      0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+      20% { opacity: 1; transform: translate(-50%, -20px) scale(1.15); }
+      100% { opacity: 0; transform: translate(-50%, -70px) scale(0.9); }
+    }
+
+    /* DYNAMIC MOVING BAMBOO BASKET (Hidden until user clicks special bottom button) */
+    .basket-wrapper {
+      position: fixed;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%) translateY(200px);
+      width: 230px;
+      height: 155px;
+      z-index: 999;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      filter: drop-shadow(0 12px 28px rgba(31, 51, 38, 0.25));
+      will-change: left, transform, opacity;
+      touch-action: none;
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease, visibility 0.35s;
+    }
+
+    .basket-wrapper.active {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* SPECIAL BOTTOM BUTTON (Fixed trigger at webpage bottom) */
+    .bottom-game-trigger-bar {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+    }
+
+    .special-rescue-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.9rem 1.6rem;
+      background: linear-gradient(135deg, #2E7D4F 0%, #388E3C 50%, #F6A623 100%);
+      background-size: 200% 200%;
+      color: #FFFFFF;
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      box-shadow: 0 8px 28px rgba(46, 125, 79, 0.45), 0 2px 10px rgba(0,0,0,0.18);
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      backdrop-filter: blur(8px);
+      user-select: none;
+      outline: none;
+      animation: gradientShift 4s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .special-rescue-btn:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 12px 36px rgba(46, 125, 79, 0.55), 0 4px 14px rgba(0,0,0,0.22);
+      border-color: #FFFFFF;
+    }
+
+    .special-rescue-btn:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .special-rescue-btn.active {
+      background: linear-gradient(135deg, #E4572E 0%, #D32F2F 100%);
+      box-shadow: 0 8px 28px rgba(228, 87, 46, 0.45);
+    }
+
+    .special-rescue-btn .btn-pulse-ring {
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border-radius: var(--radius-full);
+      border: 2px solid #F6A623;
+      opacity: 0.8;
+      pointer-events: none;
+      animation: pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .special-rescue-btn.active .btn-pulse-ring {
+      display: none;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.96); opacity: 0.8; }
+      50% { transform: scale(1.08); opacity: 0.2; }
+      100% { transform: scale(0.96); opacity: 0.8; }
+    }
+
+    .special-rescue-btn .btn-icon {
+      font-size: 1.35rem;
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .special-rescue-btn:hover .btn-icon {
+      transform: rotate(15deg) scale(1.2);
+    }
+
+    .special-rescue-btn .btn-badge {
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.25);
+      padding: 0.15rem 0.6rem;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 600px) {
+      .bottom-game-trigger-bar {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        justify-content: center;
+      }
+      .special-rescue-btn {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.95rem;
+        padding: 0.8rem 1.2rem;
+      }
+      .basket-wrapper {
+        width: 190px;
+        height: 130px;
+        bottom: 80px;
+      }
+    }
+
+    .basket-badge-prompt {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      background: var(--accent-mango);
+      color: var(--text-dark);
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.2rem 0.75rem;
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-sm);
+      pointer-events: none;
+      animation: bouncePrompt 2.5s ease-in-out infinite;
+    }
+
+    @keyframes bouncePrompt {
+      0%, 100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, -6px); }
+    }
+
+    .bamboo-basket {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-origin: bottom center;
+      transition: transform 0.15s ease-out;
+    }
+
+    .bamboo-basket.idle-sway {
+      animation: basketSway 4s ease-in-out infinite alternate;
+    }
+
+    .bamboo-basket.basket-bounce {
+      animation: basketBounce 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    }
+
+    @keyframes basketSway {
+      0% { transform: rotate(-2deg); }
+      100% { transform: rotate(2deg); }
+    }
+
+    @keyframes basketBounce {
+      0% { transform: scale(1, 1); }
+      30% { transform: scale(1.12, 0.85); }
+      60% { transform: scale(0.95, 1.05); }
+      80% { transform: scale(1.03, 0.98); }
+      100% { transform: scale(1, 1); }
+    }
+
+    /* Resting items layer inside basket */
+    .basket-contents {
+      position: absolute;
+      bottom: 35px;
+      left: 20px;
+      right: 20px;
+      height: 60px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      z-index: 2; /* Between basket back and front */
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .resting-food-item {
+      width: 32px;
+      height: 32px;
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0) rotate(-20deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    /* ==========================================================================
+       4. NAVBAR STYLING
+       ========================================================================== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 50;
+      background-color: var(--bg-surface-translucent);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color var(--transition-normal), box-shadow var(--transition-normal);
+    }
+
+    .navbar-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 76px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--font-heading);
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .brand-logo:hover .brand-icon {
+      transform: scale(1.15) rotate(-6deg);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-dark);
+      transition: color var(--transition-fast);
+      position: relative;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background-color: var(--accent-mango);
+      border-radius: var(--radius-full);
+      transition: width var(--transition-fast);
+    }
+
+    .nav-link:hover {
+      color: var(--primary);
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-dark);
+    }
+
+    /* Mobile Drawer */
+    @media (max-width: 900px) {
+      .nav-links {
+        position: fixed;
+        top: 76px;
+        left: 0;
+        width: 100%;
+        background-color: var(--bg-surface);
+        flex-direction: column;
+        padding: 2rem;
+        gap: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-150%);
+        transition: transform var(--transition-normal);
+        z-index: 49;
+      }
+      .nav-links.active {
+        transform: translateY(0);
+      }
+      .mobile-menu-btn {
+        display: block;
+      }
+      .nav-actions .btn-primary {
+        display: none;
+      }
+    }
+
+    /* ==========================================================================
+       5. HERO SECTION
+       ========================================================================== */
+    .hero-section {
+      padding: 4rem 0 6rem 0;
+      min-height: calc(100vh - 76px);
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .hero-headline {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      color: var(--text-dark);
+      margin-bottom: 1.5rem;
+      line-height: 1.15;
+    }
+
+    .hero-headline span {
+      color: var(--primary);
+      position: relative;
+    }
+
+    .hero-subheadline {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      max-width: 600px;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 3.5rem;
+    }
+
+    /* Live Counter Strip in Hero */
+    .live-counter-strip {
+      display: flex;
+      gap: 2rem;
+      padding: 1.25rem 1.75rem;
+      background: var(--bg-surface-translucent);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      width: fit-content;
+    }
+
+    .counter-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .counter-value {
+      font-family: var(--font-heading);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .counter-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    .hero-visual {
+      position: relative;
+    }
+
+    .hero-illustration-card {
+      position: relative;
+      background: linear-gradient(135deg, rgba(46,125,79,0.1) 0%, rgba(246,166,35,0.1) 100%);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      border: 2px dashed var(--border-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    @media (max-width: 992px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .hero-subheadline {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .hero-cta-group {
+        justify-content: center;
+      }
+      .live-counter-strip {
+        margin: 0 auto;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+
+    /* ==========================================================================
+       6. THE PROBLEM SECTION
+       ========================================================================== */
+    .problem-section {
+      background-color: var(--bg-subtle);
+    }
+
+    .problem-content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 4rem;
+    }
+
+    .problem-text-card {
+      background: var(--bg-surface);
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .problem-text-card p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* Challenge Keyword Cards */
+    .challenge-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .challenge-card {
+      text-align: center;
+      padding: 2rem 1.5rem;
+    }
+
+    .challenge-icon-box {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 1.25rem auto;
+      border-radius: 50%;
+      background: rgba(228, 87, 46, 0.12);
+      color: var(--accent-tomato);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      transition: transform var(--transition-bounce);
+    }
+
+    .challenge-card:hover .challenge-icon-box {
+      transform: scale(1.15) rotate(6deg);
+    }
+
+    .challenge-title {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .challenge-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    /* Surplus Sources Chips */
+    .surplus-sources-container {
+      text-align: center;
+    }
+
+    .surplus-label {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      color: var(--text-dark);
+      margin-bottom: 1rem;
+    }
+
+    .chips-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .source-chip {
+      padding: 0.6rem 1.25rem;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 0.95rem;
+      box-shadow: var(--shadow-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .source-chip:hover {
+      background-color: var(--primary);
+      color: #FFF;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .problem-content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ==========================================================================
+       7. SOLUTION & PROJECT AIMS
+       ========================================================================== */
+    .solution-box {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #FFFFFF;
+      padding: 3.5rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .solution-box h3 {
+      color: var(--accent-mango);
+      font-size: 2.2rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .solution-box p {
+      font-size: 1.2rem;
+      line-height: 1.7;
+      opacity: 0.95;
+      max-width: 900px;
+    }
+
+    /* Project Aims Cards */
+    .aims-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .aim-card {
+      position: relative;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .aim-number {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent-mango);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .aim-text {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-dark);
+      line-height: 1.4;
+    }
+
+    /* ==========================================================================
+       8. HOW IT WORKS
+       ========================================================================== */
+    .how-it-works-section {
+      background-color: var(--bg-subtle);
+    }
+
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      position: relative;
+      margin-bottom: 3rem;
+    }
+
+    /* SVG Connecting Line */
+    .bridge-line-svg {
+      position: absolute;
+      top: 40px;
+      left: 10%;
+      width: 80%;
+      height: 4px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .bridge-line-path {
+      stroke: var(--accent-mango);
+      stroke-width: 4;
+      stroke-dasharray: 8 6;
+      fill: none;
+      animation: dashMove 20s linear infinite;
+    }
+
+    @keyframes dashMove {
+      to { stroke-dashoffset: -100; }
+    }
+
+    .step-card {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2rem 1.25rem;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .step-badge {
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      color: #FFF;
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem auto;
+      box-shadow: 0 0 0 6px var(--bg-surface);
+    }
+
+    .step-title {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .complexity-note {
+      text-align: center;
+      background: rgba(46, 125, 79, 0.08);
+      border: 1px solid rgba(46, 125, 79, 0.2);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.5rem;
+      max-width: 750px;
+      margin: 0 auto;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    @media (max-width: 992px) {
+      .workflow-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .bridge-line-svg { display: none; }
+    }
+    @media (max-width: 576px) {
+      .workflow-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ==========================================================================
+       9. MEASURABLE IMPACT SECTION
+       ========================================================================== */
+    .impact-section {
+      background-color: var(--bg-subtle);
+    }
+
+    .impact-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .impact-card {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+    }
+
+    .impact-number {
+      font-family: var(--font-heading);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .impact-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    /* SVG Chart Box */
+    .chart-box {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-badge {
+      font-size: 0.8rem;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       10. REAL-WORLD COMMUNITY SECTION & FORM
+       ========================================================================== */
+    .community-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .drive-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .drive-step-item {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+    }
+
+    .drive-step-num {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      background: var(--accent-mango);
+      color: var(--text-dark);
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .drive-step-content h4 {
+      font-size: 1.2rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .drive-step-content p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Form Design */
+    .signup-form-card {
+      background: var(--bg-surface);
+      padding: 2.5rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.4rem;
+      color: var(--text-dark);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-cream);
+      color: var(--text-dark);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      background: var(--bg-surface);
+      box-shadow: 0 0 0 4px rgba(46, 125, 79, 0.15);
+      outline: none;
+    }
+
+    .form-success-toast {
+      display: none;
+      background: rgba(67, 160, 71, 0.15);
+      border: 1.5px solid var(--primary);
+      color: var(--primary-dark);
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      text-align: center;
+      margin-top: 1rem;
+      animation: popIn 0.3s ease-out;
+    }
+
+    @media (max-width: 850px) {
+      .community-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ==========================================================================
+       11. FOOTER & BASKET CENTERPIECE
+       ========================================================================== */
+    .footer {
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-color);
+      padding: 4rem 0 2rem 0;
+      position: relative;
+      z-index: 5;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-brand p {
+      color: var(--text-muted);
+      margin-top: 1rem;
+      max-width: 360px;
+    }
+
+    .footer-title {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      margin-bottom: 1.25rem;
+      color: var(--text-dark);
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      font-weight: 600;
+      transition: color var(--transition-fast);
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+    }
+
+    /* ==========================================================================
+       12. AMBIENT GLOW ORBS & INTERACTIVE SIMULATOR / CALCULATOR
+       ========================================================================== */
+    .ambient-glow-orb {
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.45;
+      animation: floatAura 8s ease-in-out infinite alternate;
+    }
+    .ambient-glow-1 {
+      top: -60px;
+      right: -40px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.45) 0%, rgba(6, 182, 212, 0) 70%);
+    }
+    .ambient-glow-2 {
+      bottom: -100px;
+      left: -80px;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.4) 0%, rgba(244, 63, 94, 0) 70%);
+    }
+    @keyframes floatAura {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(35px, -45px) scale(1.12); }
+    }
+
+    .interactive-sim-card {
+      position: relative;
+      background: var(--bg-surface-translucent);
+      border: 1px solid var(--border-glow);
+      box-shadow: var(--shadow-glow);
+      text-align: left;
+      padding: 1.75rem;
+      border-radius: var(--radius-lg);
+      transition: all var(--transition-normal);
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .interactive-sim-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent-cyan) 50%, var(--accent-amber) 100%);
+    }
+
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .sim-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #10B981;
+      background: rgba(16, 185, 129, 0.15);
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-full);
+      letter-spacing: 0.05em;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10B981;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #10B981;
+      animation: pulseGlow 1.5s infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.4; }
+    }
+
+    .sim-step-tag {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .sim-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      background: var(--bg-subtle);
+      padding: 0.35rem;
+      border-radius: var(--radius-full);
+    }
+
+    .sim-tab {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius-full);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .sim-tab.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+    }
+
+    .sim-tab:hover:not(.active) {
+      color: var(--primary);
+    }
+
+    .sim-content-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .sim-status-pill {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-available {
+      background: rgba(16, 185, 129, 0.15);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-claimed {
+      background: rgba(245, 158, 11, 0.15);
+      color: #D97706;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-distributed {
+      background: rgba(6, 182, 212, 0.15);
+      color: #0891B2;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .sim-title {
+      font-size: 1.15rem;
+      color: var(--text-dark);
+      margin-bottom: 0.35rem;
+    }
+
+    .sim-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.85rem;
+    }
+
+    .sim-timer-glow {
+      color: var(--accent-tomato);
+      font-weight: 700;
+    }
+
+    .sim-progress-track {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: 0.85rem;
+    }
+
+    .sim-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent-cyan) 100%);
+      border-radius: var(--radius-full);
+      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .sim-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .sim-action-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sim-btn {
+      font-size: 0.9rem;
+      padding: 0.65rem 1.25rem;
+    }
+
+    .sim-hint {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+
+    /* Calculator Styles */
+    .calc-container {
+      background: var(--bg-surface-translucent);
+      border: 1px solid var(--border-glow);
+      box-shadow: var(--shadow-glow);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      margin-top: 3.5rem;
+    }
+
+    .calc-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .calc-title {
+      font-size: 1.6rem;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .calc-slider-box {
+      max-width: 600px;
+      margin: 0 auto 2.5rem auto;
+      text-align: center;
+    }
+
+    .calc-val-display {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .calc-range-input {
+      width: 100%;
+      height: 10px;
+      -webkit-appearance: none;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-full);
+      outline: none;
+    }
+
+    .calc-range-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .calc-range-input::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .calc-results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .calc-res-card {
+      background: var(--bg-cream);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .calc-res-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary-light);
+    }
+
+    .calc-res-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .calc-res-val {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 0.25rem;
+    }
+
+    .calc-res-lbl {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       13. LEFT SIDE PANEL MENU DRAWER
+       ========================================================================== */
+    .side-panel-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(11, 19, 43, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 9990;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    .side-panel-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .side-panel-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 340px;
+      max-width: 85vw;
+      height: 100vh;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-glow);
+      box-shadow: 12px 0 45px rgba(0, 0, 0, 0.4);
+      z-index: 9999;
+      transform: translateX(-100%);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .side-panel-drawer.active {
+      transform: translateX(0);
+    }
+
+    .side-panel-header {
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-cream);
+    }
+
+    .side-panel-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-bounce);
+    }
+
+    .side-panel-close:hover {
+      background: var(--accent-tomato);
+      color: #FFFFFF;
+      border-color: var(--accent-tomato);
+      transform: rotate(90deg);
+    }
+
+    .side-panel-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      flex: 1;
+    }
+
+    .side-panel-section-title {
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .side-panel-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .side-panel-btn {
+      width: 100%;
+      justify-content: flex-start;
+      padding: 0.85rem 1.25rem;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .side-panel-nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .side-panel-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+    }
+
+    .side-panel-nav-link:hover {
+      background: var(--bg-subtle);
+      color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    .side-panel-footer {
+      padding: 1.25rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-cream);
+      text-align: center;
+    }
+
+    /* Prefers-reduced-motion fallback */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      #falling-food-container { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       LEFT SIDE PANEL BACKDROP & DRAWER
+       ========================================================================== -->
+  <div id="side-panel-backdrop" class="side-panel-backdrop" onclick="closeSidePanel()"></div>
+
+  <aside id="side-panel-drawer" class="side-panel-drawer" aria-label="Side Navigation Panel">
+    <div class="side-panel-header">
+      <a href="#home" class="brand-logo" style="font-size:1.3rem;">
+        <svg class="brand-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:36px; height:36px;">
+          <rect x="2" y="2" width="60" height="60" rx="18" fill="#059669" fill-opacity="0.15" stroke="#059669" stroke-width="1.5" />
+          <path d="M 10 48 Q 32 24 54 48" stroke="#059669" stroke-width="5" stroke-linecap="round" fill="none" />
+        </svg>
+        <span>FoodBridge Menu</span>
+      </a>
+      <button class="side-panel-close" onclick="closeSidePanel()" aria-label="Close Side Panel">&times;</button>
+    </div>
+
+    <div class="side-panel-body">
+      <!-- Portal Launch & Auth Section -->
+      <div>
+        <div class="side-panel-section-title">🚀 Portal Access &amp; Sign In</div>
+        <div class="side-panel-btn-group">
+          <a href="portal.html" class="btn btn-primary side-panel-btn">
+            <span>🚀 Launch Portal App ➔</span>
+          </a>
+          <button onclick="openLandingAuthModal('login'); closeSidePanel();" class="btn btn-secondary side-panel-btn">
+            <span>🔑 Sign In / Register</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Role Workflows -->
+      <div>
+        <div class="side-panel-section-title">⚡ Operational Workflows</div>
+        <div class="side-panel-btn-group">
+          <button onclick="launchPortalWithRole('donor'); closeSidePanel();" class="btn btn-primary side-panel-btn" style="background:#059669; border-color:#059669;">
+            <span>👨‍🍳 Donate Surplus Food</span>
+          </button>
+          <button onclick="launchPortalWithRole('volunteer'); closeSidePanel();" class="btn btn-accent side-panel-btn">
+            <span>🚴 Volunteer Courier</span>
+          </button>
+          <button onclick="launchPortalWithRole('ngo'); closeSidePanel();" class="btn btn-secondary side-panel-btn">
+            <span>🏢 NGO Shelter Hub</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Navigation -->
+      <div>
+        <div class="side-panel-section-title">📍 Navigation Links</div>
+        <ul class="side-panel-nav-list">
+          <li><a href="#home" onclick="closeSidePanel()" class="side-panel-nav-link"><span>🏠</span> Home</a></li>
+          <li><a href="#problem" onclick="closeSidePanel()" class="side-panel-nav-link"><span>⚠️</span> The Problem</a></li>
+          <li><a href="#how-it-works" onclick="closeSidePanel()" class="side-panel-nav-link"><span>⚙️</span> How It Works</a></li>
+          <li><a href="#impact" onclick="closeSidePanel()" class="side-panel-nav-link"><span>📊</span> Impact Dashboard</a></li>
+          <li><a href="#get-involved" onclick="closeSidePanel()" class="side-panel-nav-link"><span>🤝</span> Get Involved</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="side-panel-footer">
+      <div style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">
+        🌿 FoodBridge &bull; Zero Food Waste
+      </div>
+    </div>
+  </aside>
+
+  <!-- SPECIAL BOTTOM TRIGGER BUTTON (Fixed at page bottom) -->
+  <div class="bottom-game-trigger-bar" id="bottom-game-trigger-bar">
+    <button class="special-rescue-btn" id="special-rescue-btn" aria-label="Toggle Falling Food Catch Game">
+      <span class="btn-pulse-ring"></span>
+      <span class="btn-icon" id="special-btn-icon">🍎</span>
+      <span class="btn-text" id="special-btn-text">Start Food Rescue!</span>
+      <span class="btn-badge">Catch Food</span>
+    </button>
+  </div>
+
+  <!-- ==========================================================================
+       FALLING FOOD OVERLAY (Fixed layer across viewport)
+       ========================================================================== -->
+  <div id="falling-food-container" aria-hidden="true"></div>
+
+  <!-- DYNAMIC MOVING BAMBOO BASKET (Fixed at Viewport Bottom) -->
+  <div class="basket-wrapper" id="basket-wrapper">
+    <span class="basket-badge-prompt">🧺 Move mouse / touch to guide basket!</span>
+    <div class="bamboo-basket idle-sway" id="bamboo-basket" title="Guide basket to catch falling food items!">
+      
+      <!-- Resting Food Container Layer -->
+      <div class="basket-contents" id="basket-contents">
+        <!-- Dynamic resting food items render here -->
+      </div>
+
+      <!-- Hand-Woven Bamboo Basket SVG -->
+      <svg viewBox="0 0 240 170" width="230" height="155" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Bamboo Weave Pattern -->
+          <pattern id="bambooWeave" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M0 10 H20 M10 0 V20" stroke="#A67C3D" stroke-width="2.5"/>
+            <path d="M0 0 L20 20 M20 0 L0 20" stroke="#E3C792" stroke-width="1.2" opacity="0.6"/>
+          </pattern>
+          
+          <filter id="basketShadow" x="-10%" y="-10%" width="120%" height="130%">
+            <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#1F3326" flood-opacity="0.2"/>
+          </filter>
+        </defs>
+
+        <!-- Basket Back Interior -->
+        <ellipse cx="120" cy="50" rx="95" ry="25" fill="#8C652D"/>
+
+        <!-- Basket Main Body (Outer Shell) -->
+        <path d="M25 50 C25 120, 55 155, 120 155 C185 155, 215 120, 215 50 Z" fill="url(#bambooWeave)" filter="url(#basketShadow)"/>
+        <path d="M25 50 C25 120, 55 155, 120 155 C185 155, 215 120, 215 50 Z" fill="#C9A66B" opacity="0.4"/>
+
+        <!-- Woven Vertical Strands Accent -->
+        <path d="M45 53 C50 110, 75 145, 120 145 C165 145, 190 110, 195 53" stroke="#A67C3D" stroke-width="3" fill="none"/>
+        <path d="M70 56 C75 105, 95 140, 120 140 C145 140, 165 105, 170 56" stroke="#E3C792" stroke-width="2.5" fill="none"/>
+
+        <!-- Front Rim Overlay (Hides bottom of collected food items) -->
+        <ellipse cx="120" cy="50" rx="95" ry="22" fill="none" stroke="#E3C792" stroke-width="7"/>
+        <ellipse cx="120" cy="50" rx="95" ry="22" fill="none" stroke="#A67C3D" stroke-width="3"/>
+      </svg>
+
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       A. STICKY NAVBAR
+       ========================================================================== -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button onclick="openSidePanel()" class="btn btn-icon" aria-label="Open Side Menu Bar" title="Open Side Menu Bar" style="font-size:1.25rem;">
+          ☰
+        </button>
+        <a href="#home" class="brand-logo" aria-label="FoodBridge Home">
+          <!-- Cute Mascot & Meaningful Bridge Logo -->
+          <svg class="brand-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="cuteNavShadow" x="-10%" y="-10%" width="130%" height="130%">
+                <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#1F3326" flood-opacity="0.18"/>
+              </filter>
+              <linearGradient id="appleNavGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FF6B6B" />
+                <stop offset="60%" stop-color="#EE5253" />
+                <stop offset="100%" stop-color="#C82333" />
+              </linearGradient>
+              <linearGradient id="bridgeNavGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#2E7D4F" />
+                <stop offset="50%" stop-color="#43A047" />
+                <stop offset="100%" stop-color="#F6A623" />
+              </linearGradient>
+              <linearGradient id="leafNavGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#66BB6A" />
+                <stop offset="100%" stop-color="#2E7D4F" />
+              </linearGradient>
+              <linearGradient id="heartNavGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FF8A80" />
+                <stop offset="100%" stop-color="#E53935" />
+              </linearGradient>
+            </defs>
+
+            <!-- Soft Shield Background -->
+            <rect x="2" y="2" width="60" height="60" rx="18" fill="#2E7D4F" fill-opacity="0.12" stroke="#2E7D4F" stroke-opacity="0.2" stroke-width="1.5" />
+
+            <!-- Connecting Arch Bridge Foundation -->
+            <path d="M 10 48 Q 32 24 54 48" stroke="url(#bridgeNavGrad)" stroke-width="5" stroke-linecap="round" fill="none" filter="url(#cuteNavShadow)" />
+            <path d="M 16 48 Q 32 30 48 48" stroke="#FFFFFF" stroke-width="1.8" stroke-dasharray="2 3" stroke-linecap="round" fill="none" opacity="0.85" />
+            <circle cx="12" cy="48" r="3" fill="#2E7D4F" />
+            <circle cx="52" cy="48" r="3" fill="#F6A623" />
+
+            <!-- Cute Smiling Mascot Apple -->
+            <g filter="url(#cuteNavShadow)">
+              <path d="M 32 16 C 24 16, 17 22, 17 31 C 17 40, 24 45, 32 45 C 40 45, 47 40, 47 31 C 47 22, 40 16, 32 16 Z" fill="url(#appleNavGrad)" />
+              <path d="M 21 24 C 20 28, 20 34, 23 37 C 22 33, 22 28, 24 25 C 23 24.5, 22 24, 21 24 Z" fill="#FFFFFF" opacity="0.45" />
+              <path d="M 32 16 C 30 11, 24 10, 22 13 C 24 16, 28 17, 32 16 Z" fill="url(#leafNavGrad)" />
+              <path d="M 32 16 C 35 12, 41 12, 42 15 C 39 17, 35 17, 32 16 Z" fill="#81C784" opacity="0.75" />
+              <path d="M 32 17 Q 31 13 33 11" stroke="#5D4037" stroke-width="2" stroke-linecap="round" fill="none" />
+              
+              <!-- Eyes & Cheeks -->
+              <circle cx="27" cy="30" r="2.2" fill="#1F3326" />
+              <circle cx="26.3" cy="29.2" r="0.8" fill="#FFFFFF" />
+              <circle cx="37" cy="30" r="2.2" fill="#1F3326" />
+              <circle cx="36.3" cy="29.2" r="0.8" fill="#FFFFFF" />
+              <ellipse cx="23.5" cy="33.5" rx="2.5" ry="1.5" fill="#FF8A80" opacity="0.85" />
+              <ellipse cx="40.5" cy="33.5" rx="2.5" ry="1.5" fill="#FF8A80" opacity="0.85" />
+              <path d="M 29.5 33.5 Q 32 37 34.5 33.5" stroke="#1F3326" stroke-width="1.8" stroke-linecap="round" fill="none" />
+            </g>
+
+            <!-- Floating Care Heart -->
+            <path d="M 47 14 C 47 11.5, 44.5 10, 43 11.5 C 41.5 10, 39 11.5, 39 14 C 39 17, 43 19.5, 43 19.5 C 43 19.5, 47 17, 47 14 Z" fill="url(#heartNavGrad)" filter="url(#cuteNavShadow)"/>
+            
+            <!-- Sparkles -->
+            <path d="M 14 18 L 15 20 L 17 21 L 15 22 L 14 24 L 13 22 L 11 21 L 13 20 Z" fill="#F6A623" opacity="0.9" />
+            <path d="M 50 36 L 51 37.5 L 52.5 38 L 51 38.5 L 50 40 L 49 38.5 L 47.5 38 L 49 37.5 Z" fill="#F6A623" opacity="0.75" />
+          </svg>
+          <span>FoodBridge</span>
+        </a>
+      </div>
+
+      <nav>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="#home" class="nav-link">Home</a></li>
+          <li><a href="#problem" class="nav-link">The Problem</a></li>
+          <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="#impact" class="nav-link">Impact</a></li>
+          <li><a href="#get-involved" class="nav-link">Get Involved</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Theme Toggle Button -->
+        <button id="theme-toggle" class="btn btn-icon" aria-label="Toggle Dark/Light Mode" title="Toggle Theme">
+          <span id="theme-icon">🌙</span>
+        </button>
+        <!-- User Profile Icon Button (Replaces right menu bar) -->
+        <button id="nav-profile-btn" onclick="openProfileModal()" class="btn btn-secondary profile-nav-btn" aria-label="User Profile" title="View User Profile" style="gap:0.55rem; white-space:nowrap; display:inline-flex; align-items:center; padding:0.45rem 0.9rem; border-radius:var(--radius-full);">
+          <span id="nav-profile-avatar" style="width:26px; height:26px; border-radius:50%; background:var(--primary); color:#ffffff; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem;">👤</span>
+          <span id="nav-profile-label" style="font-weight:600; font-size:0.88rem;">Profile</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       B. HERO SECTION
+       ========================================================================== -->
+  <section id="home" class="hero-section">
+    <div class="container hero-grid">
+      <div class="hero-text-content">
+        <h1 class="hero-headline">Every meal saved is a <span>bridge built.</span></h1>
+        <p class="hero-subheadline">
+          FoodBridge connects surplus food from canteens, restaurants, and events directly to communities facing food insecurity.
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="portal.html" class="btn btn-primary" style="white-space:nowrap;">🚀 Launch Rescue Portal ➔</a>
+          <button onclick="openProfileModal()" class="btn btn-accent" style="white-space:nowrap;">👤 View My Profile</button>
+        </div>
+
+        <!-- Live Counter Strip -->
+        <div class="live-counter-strip">
+          <div class="counter-item">
+            <span class="counter-value" id="hero-counter-meals">0</span>
+            <span class="counter-label">Meals Rescued</span>
+          </div>
+          <div style="width: 1px; background: var(--border-color);"></div>
+          <div class="counter-item">
+            <span class="counter-value" id="hero-counter-waste">0</span>
+            <span class="counter-label">Food Waste Avoided (kg)</span>
+          </div>
+          <div style="width: 1px; background: var(--border-color);"></div>
+          <div class="counter-item">
+            <span class="counter-value" id="hero-counter-vols">480+</span>
+            <span class="counter-label">Active Volunteers</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Card & Interactive Live Simulator -->
+      <div class="hero-visual">
+        <div class="ambient-glow-orb ambient-glow-1"></div>
+        <div class="hero-illustration-card card interactive-sim-card">
+          <div class="sim-header">
+            <span class="sim-live-badge"><span class="pulse-dot"></span> LIVE WORKFLOW SIMULATION</span>
+            <span class="sim-step-tag" id="sim-step-tag">Step 1 of 3</span>
+          </div>
+
+          <!-- Role Switcher Tabs -->
+          <div class="sim-tabs">
+            <button class="sim-tab active" id="sim-tab-donor" onclick="switchSimRole('donor')">👨‍🍳 Donor</button>
+            <button class="sim-tab" id="sim-tab-courier" onclick="switchSimRole('courier')">🚴 Courier</button>
+            <button class="sim-tab" id="sim-tab-ngo" onclick="switchSimRole('ngo')">🏢 NGO</button>
+          </div>
+
+          <!-- Dynamic Interactive Content Box -->
+          <div class="sim-content-box" id="sim-content-box">
+            <div class="sim-status-pill status-available" id="sim-status-pill">● AVAILABLE FOR RESCUE</div>
+            <h4 class="sim-title" id="sim-title">50 Servings Fresh Veg Curry & Rice</h4>
+            <p class="sim-meta" id="sim-meta">📍 Campus Central Canteen • ⌛ Expires in <span id="sim-timer" class="sim-timer-glow">2h 15m</span></p>
+
+            <!-- Interactive Progress Track -->
+            <div class="sim-progress-track">
+              <div class="sim-progress-bar" id="sim-progress-bar" style="width: 33%;"></div>
+            </div>
+
+            <p class="sim-desc" id="sim-desc">
+              Donor posts surplus food listing with pickup location and live expiry timer. Automated alert dispatched to nearby volunteers.
+            </p>
+          </div>
+
+          <div class="sim-action-footer" style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center;">
+            <button class="btn btn-accent btn-sm sim-btn" id="sim-action-btn" onclick="nextSimStep()" style="flex:1; justify-content:center; white-space:nowrap;">
+              ⚡ Next Stage
+            </button>
+            <button class="btn btn-primary btn-sm sim-btn" id="sim-portal-btn" onclick="launchPortalWithRole('donor')" style="flex:1; justify-content:center; white-space:nowrap;">
+              👨‍🍳 Execute Donor Posting ➔
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Curve Divider -->
+  <svg class="divider-wave" viewBox="0 0 1200 120" preserveAspectRatio="none">
+    <path d="M0,0 C150,90 350,-40 500,50 C650,140 900,10 1200,40 L1200,120 L0,120 Z" fill="currentColor"></path>
+  </svg>
+
+  <!-- ==========================================================================
+       C. THE PROBLEM SECTION
+       ========================================================================== -->
+  <section id="problem" class="problem-section">
+    <div class="container">
+      <div class="text-center mx-auto">
+        <span class="section-tag">The Challenge</span>
+        <h2 class="section-title">What's Going On?</h2>
+      </div>
+
+      <div class="problem-content-grid">
+        <div class="problem-text-card card">
+          <h3 style="font-size: 1.35rem; color: var(--accent-tomato); margin-bottom: 1rem;">The Surplus Paradox</h3>
+          <p>
+            Food wastage is a significant social and environmental issue. Large quantities of edible surplus food from college canteens, restaurants, hotels, households, and events are often discarded because there is no timely mechanism to connect that food with people or organizations that can use it. At the same time, many communities face food insecurity and limited access to adequate meals.
+          </p>
+        </div>
+
+        <div class="problem-text-card card">
+          <h3 style="font-size: 1.35rem; color: var(--primary); margin-bottom: 1rem;">The Awareness Gap</h3>
+          <p>
+            While food donation and redistribution initiatives exist, young people often have limited awareness or active participation in food-rescue activities. Traditional awareness campaigns may communicate the problem but do not necessarily make people understand the practical challenges involved in rescuing food, such as limited time, food expiry, transportation constraints, and choosing efficient delivery routes.
+          </p>
+        </div>
+      </div>
+
+      <!-- 4 Challenge Keyword Animated Cards -->
+      <div class="challenge-cards-grid">
+        <div class="challenge-card card">
+          <div class="challenge-icon-box">⏱️</div>
+          <h4 class="challenge-title">Limited Time</h4>
+          <p class="challenge-desc">Surplus meals must be collected immediately post-event before window closes.</p>
+        </div>
+
+        <div class="challenge-card card">
+          <div class="challenge-icon-box">⏳</div>
+          <h4 class="challenge-title">Food Expiry</h4>
+          <p class="challenge-desc">Perishable items lose safety rapidly without temperature-controlled transport.</p>
+        </div>
+
+        <div class="challenge-card card">
+          <div class="challenge-icon-box">🚛</div>
+          <h4 class="challenge-title">Transportation</h4>
+          <p class="challenge-desc">Mobilizing volunteers and vehicles on short notice presents logistical hurdles.</p>
+        </div>
+
+        <div class="challenge-card card">
+          <div class="challenge-icon-box">🗺️</div>
+          <h4 class="challenge-title">Efficient Routes</h4>
+          <p class="challenge-desc">Mapping optimal delivery paths to community centers saves crucial minutes.</p>
+        </div>
+      </div>
+
+      <!-- Surplus Sources Chips -->
+      <div class="surplus-sources-container">
+        <div class="surplus-label">Key Surplus Sources Identified:</div>
+        <div class="chips-wrapper">
+          <span class="source-chip">🏫 College Canteens</span>
+          <span class="source-chip">🍽️ Restaurants</span>
+          <span class="source-chip">🏨 Hotels</span>
+          <span class="source-chip">🏡 Households</span>
+          <span class="source-chip">🎉 Events & Festivities</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Curve Divider Alt -->
+  <svg class="divider-wave divider-wave-alt" viewBox="0 0 1200 120" preserveAspectRatio="none">
+    <path d="M0,60 C300,120 600,0 900,90 C1050,135 1150,45 1200,60 L1200,120 L0,120 Z" fill="var(--bg-cream)"></path>
+  </svg>
+
+  <!-- ==========================================================================
+       D & E. WHAT FOODBRIDGE DOES & PROJECT AIMS
+       ========================================================================== -->
+  <section id="solution" class="solution-section">
+    <div class="container">
+      <!-- D. Solution Box -->
+      <div class="solution-box">
+        <h3>What FoodBridge Does</h3>
+        <p>
+          FoodBridge connects surplus food sources with local student volunteers and community redistribution centers. Volunteers receive real-time notifications for nearby food surplus pickups, coordinate transportation, and deliver meals before food expiry timers run out.
+        </p>
+      </div>
+
+      <!-- E. Project Aims -->
+      <div class="text-center mx-auto" style="margin-top: 4rem;">
+        <span class="section-tag">Core Objectives</span>
+        <h2 class="section-title">Project Aims</h2>
+        <p class="section-subtitle mx-auto">Empowering students through awareness and tangible community action.</p>
+      </div>
+
+      <div class="aims-grid">
+        <div class="aim-card card">
+          <span class="aim-number">01</span>
+          <p class="aim-text">Increase awareness of food wastage among students.</p>
+        </div>
+        <div class="aim-card card">
+          <span class="aim-number">02</span>
+          <p class="aim-text">Teach the importance of timely food rescue and redistribution.</p>
+        </div>
+        <div class="aim-card card">
+          <span class="aim-number">03</span>
+          <p class="aim-text">Make sustainability education practical and accessible.</p>
+        </div>
+        <div class="aim-card card">
+          <span class="aim-number">04</span>
+          <p class="aim-text">Encourage direct participation in community food drives.</p>
+        </div>
+        <div class="aim-card card">
+          <span class="aim-number">05</span>
+          <p class="aim-text">Demonstrate measurable outcomes through platform analytics.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       F. HOW IT WORKS
+       ========================================================================== -->
+  <section id="how-it-works" class="how-it-works-section">
+    <div class="container">
+      <div class="text-center mx-auto">
+        <span class="section-tag">Rescue Workflow</span>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle mx-auto">From surplus notification to real-world community impact in four simple steps.</p>
+      </div>
+
+      <div class="workflow-grid">
+        <!-- Connecting Bridge Line -->
+        <svg class="bridge-line-svg" viewBox="0 0 800 20">
+          <path class="bridge-line-path" d="M0,10 Q200,-5 400,10 T800,10"/>
+        </svg>
+
+        <div class="step-card" onclick="launchPortalWithRole('donor')" style="cursor:pointer;" title="Launch Donor Food Posting">
+          <div class="step-badge">1</div>
+          <h3 class="step-title">1. Post</h3>
+          <p class="step-desc">Canteens, restaurants, and households post surplus food listings with expiry windows.</p>
+          <button class="btn btn-primary btn-sm" style="margin-top:0.75rem; font-size:0.78rem; width:100%; justify-content:center;">👨‍🍳 Post Food ➔</button>
+        </div>
+
+        <div class="step-card" onclick="launchPortalWithRole('volunteer')" style="cursor:pointer;" title="Launch Courier Pickup Claim">
+          <div class="step-badge">2</div>
+          <h3 class="step-title">2. Claim</h3>
+          <p class="step-desc">Student volunteer couriers claim urgent rescue pickups on the platform map.</p>
+          <button class="btn btn-accent btn-sm" style="margin-top:0.75rem; font-size:0.78rem; width:100%; justify-content:center;">🚴 Accept Pickup ➔</button>
+        </div>
+
+        <div class="step-card" onclick="launchPortalWithRole('ngo')" style="cursor:pointer;" title="Launch NGO Shelter Delivery">
+          <div class="step-badge">3</div>
+          <h3 class="step-title">3. Deliver</h3>
+          <p class="step-desc">Pick efficient delivery routes to transport fresh food directly to community centers.</p>
+          <button class="btn btn-secondary btn-sm" style="margin-top:0.75rem; font-size:0.78rem; width:100%; justify-content:center;">🏢 NGO Shelter Hub ➔</button>
+        </div>
+
+        <div class="step-card" onclick="window.location.href='#impact'" style="cursor:pointer;" title="View Live Impact Analytics">
+          <div class="step-badge">4</div>
+          <h3 class="step-title">4. Impact</h3>
+          <p class="step-desc">Rescues convert into verified impact metrics, diverted meals, and carbon waste avoided.</p>
+          <button class="btn btn-primary btn-sm" style="margin-top:0.75rem; font-size:0.78rem; width:100%; justify-content:center;">📊 View Impact ➔</button>
+        </div>
+      </div>
+
+      <div class="complexity-note">
+        💡 Note: Timely decisions and efficient resource distribution minimize food waste and support local families!
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       H. MEASURABLE IMPACT SECTION
+       ========================================================================== -->
+  <section id="impact" class="impact-section">
+    <div class="container">
+      <div class="text-center mx-auto">
+        <span class="section-tag">Measurable Outcomes</span>
+        <h2 class="section-title">Our Impact Dashboard</h2>
+        <p class="section-subtitle mx-auto">Tracking actual environmental and social savings through platform analytics.</p>
+      </div>
+
+      <div class="impact-metrics-grid">
+        <div class="impact-card">
+          <div class="impact-number" id="impact-meals">12,450</div>
+          <div class="impact-label">Meals Rescued</div>
+        </div>
+
+        <div class="impact-card">
+          <div class="impact-number" id="impact-waste">4,980</div>
+          <div class="impact-label">Food Waste Avoided (kg)</div>
+        </div>
+
+        <div class="impact-card">
+          <div class="impact-number" id="impact-points">185,000</div>
+          <div class="impact-label">Impact Points Earned</div>
+        </div>
+
+        <div class="impact-card">
+          <div class="impact-number" id="impact-drives">64</div>
+          <div class="impact-label">Community Drives Completed</div>
+        </div>
+      </div>
+
+      <!-- SVG Chart -->
+      <div class="chart-box">
+        <div class="chart-header">
+          <div>
+            <h3 style="font-size: 1.25rem;">Weekly Food Rescue Trajectory</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Comparison across participating university campuses</p>
+          </div>
+          <span class="chart-badge">sample data</span>
+        </div>
+
+        <svg width="100%" height="220" viewBox="0 0 700 200" preserveAspectRatio="none">
+          <!-- Grid lines -->
+          <line x1="40" y1="40" x2="680" y2="40" stroke="var(--border-color)" stroke-dasharray="4"/>
+          <line x1="40" y1="90" x2="680" y2="90" stroke="var(--border-color)" stroke-dasharray="4"/>
+          <line x1="40" y1="140" x2="680" y2="140" stroke="var(--border-color)" stroke-dasharray="4"/>
+          <line x1="40" y1="180" x2="680" y2="180" stroke="var(--border-color)"/>
+
+          <!-- Bars -->
+          <rect x="80" y="110" width="36" height="70" rx="4" fill="var(--primary)" opacity="0.85"/>
+          <rect x="180" y="80" width="36" height="100" rx="4" fill="var(--primary)" opacity="0.85"/>
+          <rect x="280" y="60" width="36" height="120" rx="4" fill="var(--primary)" opacity="0.85"/>
+          <rect x="380" y="95" width="36" height="85" rx="4" fill="var(--primary)" opacity="0.85"/>
+          <rect x="480" y="45" width="36" height="135" rx="4" fill="var(--accent-mango)"/>
+          <rect x="580" y="30" width="36" height="150" rx="4" fill="var(--accent-mango)"/>
+
+          <!-- Bar Labels -->
+          <text x="88" y="195" font-size="12" fill="var(--text-muted)">Wk 1</text>
+          <text x="188" y="195" font-size="12" fill="var(--text-muted)">Wk 2</text>
+          <text x="288" y="195" font-size="12" fill="var(--text-muted)">Wk 3</text>
+          <text x="388" y="195" font-size="12" fill="var(--text-muted)">Wk 4</text>
+          <text x="488" y="195" font-size="12" fill="var(--text-muted)">Wk 5</text>
+          <text x="588" y="195" font-size="12" fill="var(--text-muted)">Wk 6</text>
+        </svg>
+      </div>
+
+      <!-- Interactive Impact Calculator -->
+      <div class="calc-container">
+        <div class="calc-header">
+          <span class="section-tag">Interactive Estimator</span>
+          <h3 class="calc-title">Interactive Impact Calculator</h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">Drag the slider below to project monthly environmental and community savings!</p>
+        </div>
+
+        <div class="calc-slider-box">
+          <div class="calc-val-display" id="calc-slider-val">250 Meals / Day</div>
+          <input type="range" class="calc-range-input" id="calc-slider" min="20" max="1000" step="10" value="250" oninput="updateImpactCalc(this.value)">
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem; font-weight: 600;">
+            <span>20 meals/day</span>
+            <span>500 meals/day</span>
+            <span>1,000 meals/day</span>
+          </div>
+        </div>
+
+        <div class="calc-results-grid">
+          <div class="calc-res-card">
+            <div class="calc-res-icon">🍲</div>
+            <div class="calc-res-val" id="calc-res-meals">7,500</div>
+            <div class="calc-res-lbl">Monthly Meals Diverted</div>
+          </div>
+          <div class="calc-res-card">
+            <div class="calc-res-icon">⚖️</div>
+            <div class="calc-res-val" id="calc-res-waste">3,000 kg</div>
+            <div class="calc-res-lbl">Food Waste Avoided</div>
+          </div>
+          <div class="calc-res-card">
+            <div class="calc-res-icon">🌿</div>
+            <div class="calc-res-val" id="calc-res-co2">7,500 kg</div>
+            <div class="calc-res-lbl">CO₂e Offset</div>
+          </div>
+          <div class="calc-res-card">
+            <div class="calc-res-icon">🏆</div>
+            <div class="calc-res-val" id="calc-res-points">112,500</div>
+            <div class="calc-res-lbl">Community Points</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       I. REAL-WORLD COMMUNITY COMPONENT & SIGNUP
+       ========================================================================== -->
+  <section id="get-involved" class="community-section">
+    <div class="container">
+      <div class="text-center mx-auto">
+        <span class="section-tag">Real-World Action</span>
+        <h2 class="section-title">Join a Rescue Drive</h2>
+        <p class="section-subtitle mx-auto">
+          Students can participate in or document an actual surplus-food collection and redistribution activity, connecting our network to genuine community impact.
+        </p>
+      </div>
+
+      <div class="community-grid">
+        <!-- 3-Step Flow -->
+        <div class="drive-steps">
+          <div class="drive-step-item">
+            <div class="drive-step-num">1</div>
+            <div class="drive-step-content">
+              <h4>Sign Up</h4>
+              <p>Register your student profile or college volunteer team to get matched with nearby food surplus points.</p>
+            </div>
+          </div>
+
+          <div class="drive-step-item">
+            <div class="drive-step-num">2</div>
+            <div class="drive-step-content">
+              <h4>Collect and Deliver</h4>
+              <p>Partner with campus canteens or local eateries to transport surplus food safely to designated shelters.</p>
+            </div>
+          </div>
+
+          <div class="drive-step-item">
+            <div class="drive-step-num">3</div>
+            <div class="drive-step-content">
+              <h4>Document and Share</h4>
+              <p>Log your drive details in the FoodBridge app to earn verified sustainability credits and leaderboards.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Signup Form -->
+        <div class="signup-form-card">
+          <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem;">Register for the Next Drive</h3>
+          <form id="signup-form" onsubmit="handleSignup(event)">
+            <div class="form-group">
+              <label class="form-label" for="user-name">Full Name</label>
+              <input type="text" id="user-name" class="form-control" placeholder="e.g. Alex Rivera" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="user-college">College / Organization</label>
+              <input type="text" id="user-college" class="form-control" placeholder="e.g. State University" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="user-email">Email Address</label>
+              <input type="email" id="user-email" class="form-control" placeholder="alex@university.edu" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="user-interest">Interest Area</label>
+              <select id="user-interest" class="form-control" required>
+                <option value="">Select your role...</option>
+                <option value="volunteer">Student Volunteer</option>
+                <option value="campus-lead">Campus Drive Lead</option>
+                <option value="canteen-partner">Canteen / Food Partner</option>
+                <option value="ngo">NGO / Community Center Partner</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+              Register Profile
+            </button>
+          </form>
+
+          <div id="form-success-toast" class="form-success-toast">
+            🎉 Thank you for joining FoodBridge! Check your email for orientation details.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       J. FOOTER
+       ========================================================================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#home" class="brand-logo">
+            <!-- Cute Mascot & Meaningful Bridge Logo -->
+            <svg class="brand-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <filter id="cuteFootShadow" x="-10%" y="-10%" width="130%" height="130%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#1F3326" flood-opacity="0.18"/>
+                </filter>
+                <linearGradient id="appleFootGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FF6B6B" />
+                  <stop offset="60%" stop-color="#EE5253" />
+                  <stop offset="100%" stop-color="#C82333" />
+                </linearGradient>
+                <linearGradient id="bridgeFootGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#2E7D4F" />
+                  <stop offset="50%" stop-color="#43A047" />
+                  <stop offset="100%" stop-color="#F6A623" />
+                </linearGradient>
+                <linearGradient id="leafFootGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#66BB6A" />
+                  <stop offset="100%" stop-color="#2E7D4F" />
+                </linearGradient>
+                <linearGradient id="heartFootGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FF8A80" />
+                  <stop offset="100%" stop-color="#E53935" />
+                </linearGradient>
+              </defs>
+
+              <rect x="2" y="2" width="60" height="60" rx="18" fill="#2E7D4F" fill-opacity="0.12" stroke="#2E7D4F" stroke-opacity="0.2" stroke-width="1.5" />
+              <path d="M 10 48 Q 32 24 54 48" stroke="url(#bridgeFootGrad)" stroke-width="5" stroke-linecap="round" fill="none" filter="url(#cuteFootShadow)" />
+              <path d="M 16 48 Q 32 30 48 48" stroke="#FFFFFF" stroke-width="1.8" stroke-dasharray="2 3" stroke-linecap="round" fill="none" opacity="0.85" />
+              <circle cx="12" cy="48" r="3" fill="#2E7D4F" />
+              <circle cx="52" cy="48" r="3" fill="#F6A623" />
+
+              <g filter="url(#cuteFootShadow)">
+                <path d="M 32 16 C 24 16, 17 22, 17 31 C 17 40, 24 45, 32 45 C 40 45, 47 40, 47 31 C 47 22, 40 16, 32 16 Z" fill="url(#appleFootGrad)" />
+                <path d="M 21 24 C 20 28, 20 34, 23 37 C 22 33, 22 28, 24 25 C 23 24.5, 22 24, 21 24 Z" fill="#FFFFFF" opacity="0.45" />
+                <path d="M 32 16 C 30 11, 24 10, 22 13 C 24 16, 28 17, 32 16 Z" fill="url(#leafFootGrad)" />
+                <path d="M 32 16 C 35 12, 41 12, 42 15 C 39 17, 35 17, 32 16 Z" fill="#81C784" opacity="0.75" />
+                <path d="M 32 17 Q 31 13 33 11" stroke="#5D4037" stroke-width="2" stroke-linecap="round" fill="none" />
+                
+                <circle cx="27" cy="30" r="2.2" fill="#1F3326" />
+                <circle cx="26.3" cy="29.2" r="0.8" fill="#FFFFFF" />
+                <circle cx="37" cy="30" r="2.2" fill="#1F3326" />
+                <circle cx="36.3" cy="29.2" r="0.8" fill="#FFFFFF" />
+                <ellipse cx="23.5" cy="33.5" rx="2.5" ry="1.5" fill="#FF8A80" opacity="0.85" />
+                <ellipse cx="40.5" cy="33.5" rx="2.5" ry="1.5" fill="#FF8A80" opacity="0.85" />
+                <path d="M 29.5 33.5 Q 32 37 34.5 33.5" stroke="#1F3326" stroke-width="1.8" stroke-linecap="round" fill="none" />
+              </g>
+
+              <path d="M 47 14 C 47 11.5, 44.5 10, 43 11.5 C 41.5 10, 39 11.5, 39 14 C 39 17, 43 19.5, 43 19.5 C 43 19.5, 47 17, 47 14 Z" fill="url(#heartFootGrad)" filter="url(#cuteFootShadow)"/>
+              <path d="M 14 18 L 15 20 L 17 21 L 15 22 L 14 24 L 13 22 L 11 21 L 13 20 Z" fill="#F6A623" opacity="0.9" />
+              <path d="M 50 36 L 51 37.5 L 52.5 38 L 51 38.5 L 50 40 L 49 38.5 L 47.5 38 L 49 37.5 Z" fill="#F6A623" opacity="0.75" />
+            </svg>
+            <span>FoodBridge</span>
+          </a>
+          <p>Rescue food. Bridge the gap. Connecting surplus food with volunteer action and community distribution.</p>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#problem">The Problem</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#impact">Impact</a></li>
+            <li><a href="#get-involved">Get Involved</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Contact & Community</h4>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem;">Got surplus food at your campus?</p>
+          <a href="mailto:hello@foodbridge.org" style="color: var(--primary); font-weight: 700;">hello@foodbridge.org</a>
+          <div class="social-links" style="margin-top: 1rem;">
+            <a href="#" class="btn btn-icon" aria-label="Twitter">🌐</a>
+            <a href="#" class="btn btn-icon" aria-label="Instagram">📸</a>
+            <a href="#" class="btn btn-icon" aria-label="GitHub">💻</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>Made with care to reduce food waste • FoodBridge © 2026</div>
+        <div>Built with Vanilla JS, HTML5 & CSS3</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       12. VANILLA JAVASCRIPT LOGIC
+       ========================================================================== -->
+  <script>
+    /* --------------------------------------------------------------------------
+       1. GLOBAL COUNTER & APP STATE
+       -------------------------------------------------------------------------- */
+    let mealsRescuedCount = 0;
+    const MAX_RESTING_ITEMS = 6;
+    let restingItemsInBasket = [];
+
+    // Food Icon SVG Definitions
+    const FOOD_ICONS = [
+      { name: 'Apple', emoji: '🍎', svg: `<svg viewBox="0 0 32 32"><circle cx="16" cy="18" r="11" fill="#E4572E"/><path d="M16 7 C 16 3, 20 4, 22 2" stroke="#2E7D4F" stroke-width="2.5" fill="none"/></svg>` },
+      { name: 'Banana', emoji: '🍌', svg: `<svg viewBox="0 0 32 32"><path d="M6 24 C 12 28, 24 24, 26 10 C 26 10, 20 16, 8 20 Z" fill="#F6A623"/></svg>` },
+      { name: 'Orange', emoji: '🍊', svg: `<svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="11" fill="#F6A623"/><path d="M16 6 C 18 3, 21 4, 22 2" stroke="#2E7D4F" stroke-width="2" fill="none"/></svg>` },
+      { name: 'Bread', emoji: '🍞', svg: `<svg viewBox="0 0 32 32"><path d="M6 14 C 6 8, 26 8, 26 14 L24 24 C 24 26, 8 26, 8 24 Z" fill="#C9A66B"/><path d="M9 12 L13 18 M16 12 L20 18" stroke="#8C652D" stroke-width="2"/></svg>` },
+      { name: 'Carrot', emoji: '🥕', svg: `<svg viewBox="0 0 32 32"><path d="M16 28 L24 10 L10 8 Z" fill="#E4572E"/><path d="M20 9 C 24 4, 26 6, 28 2" stroke="#2E7D4F" stroke-width="2.5" fill="none"/></svg>` },
+      { name: 'Tomato', emoji: '🍅', svg: `<svg viewBox="0 0 32 32"><circle cx="16" cy="18" r="11" fill="#E4572E"/><path d="M14 7 L16 10 L18 7 L16 5 Z" fill="#2E7D4F"/></svg>` },
+      { name: 'Rice Bowl', emoji: '🍚', svg: `<svg viewBox="0 0 32 32"><path d="M6 14 C 6 24, 26 24, 26 14 Z" fill="#FFF8EC" stroke="#C9A66B" stroke-width="2"/><ellipse cx="16" cy="14" rx="10" ry="4" fill="#FFFFFF"/></svg>` },
+      { name: 'Milk Carton', emoji: '🥛', svg: `<svg viewBox="0 0 32 32"><rect x="9" y="10" width="14" height="18" rx="2" fill="#E0F6FF" stroke="#43A047" stroke-width="2"/><polygon points="9,10 16,4 23,10" fill="#43A047"/></svg>` },
+      { name: 'Samosa', emoji: '🥟', svg: `<svg viewBox="0 0 32 32"><polygon points="16,6 4,26 28,26" fill="#F6A623" stroke="#A67C3D" stroke-width="2"/></svg>` },
+      { name: 'Grapes', emoji: '🍇', svg: `<svg viewBox="0 0 32 32"><circle cx="16" cy="14" r="5" fill="#8E24AA"/><circle cx="11" cy="18" r="5" fill="#8E24AA"/><circle cx="21" cy="18" r="5" fill="#8E24AA"/><circle cx="16" cy="23" r="5" fill="#8E24AA"/><path d="M16 9 L16 4" stroke="#2E7D4F" stroke-width="2"/></svg>` }
+    ];
+
+    /* --------------------------------------------------------------------------
+       2. FALLING FOOD PARTICLE SYSTEM & MOVING BASKET CONTROLLER
+       -------------------------------------------------------------------------- */
+    const container = document.getElementById('falling-food-container');
+    const basketWrapper = document.getElementById('basket-wrapper');
+    const basketEl = document.getElementById('bamboo-basket');
+    const basketContents = document.getElementById('basket-contents');
+    const heroCounterMeals = document.getElementById('hero-counter-meals');
+    const heroCounterWaste = document.getElementById('hero-counter-waste');
+
+    const MAX_ACTIVE_ITEMS = 14;
+    const activeParticles = [];
+
+    let basketTargetX = window.innerWidth / 2;
+    let basketCurrentX = window.innerWidth / 2;
+    let isUserControlling = false;
+    let userControlTimeout = null;
+
+    // Mouse / Touch Interactivity
+    window.addEventListener('mousemove', (e) => {
+      basketTargetX = e.clientX;
+      isUserControlling = true;
+      clearTimeout(userControlTimeout);
+      userControlTimeout = setTimeout(() => { isUserControlling = false; }, 2500);
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        basketTargetX = e.touches[0].clientX;
+        isUserControlling = true;
+        clearTimeout(userControlTimeout);
+        userControlTimeout = setTimeout(() => { isUserControlling = false; }, 2500);
+      }
+    });
+
+    class FoodParticle {
+      constructor() {
+        this.element = document.createElement('div');
+        this.element.className = 'falling-item';
+        container.appendChild(this.element);
+        this.reset(true);
+      }
+
+      reset(initial = false) {
+        const itemType = FOOD_ICONS[Math.floor(Math.random() * FOOD_ICONS.length)];
+        this.element.innerHTML = itemType.svg;
+        this.name = itemType.name;
+        this.emoji = itemType.emoji;
+
+        // Position & Velocity
+        this.x = Math.random() * (window.innerWidth - 80) + 40;
+        this.y = initial ? (Math.random() * -window.innerHeight) : (-50 - Math.random() * 120);
+        this.speedY = 1.6 + Math.random() * 2.2;
+        this.sway = Math.random() * 2;
+        this.swaySpeed = 0.02 + Math.random() * 0.03;
+        this.rotation = Math.random() * 360;
+        this.rotSpeed = (Math.random() - 0.5) * 2;
+        this.scale = 0.75 + Math.random() * 0.35;
+        this.collected = false;
+      }
+
+      update(basketRect) {
+        if (this.collected) return;
+
+        this.y += this.speedY;
+        this.x += Math.sin(this.y * this.swaySpeed) * this.sway;
+        this.rotation += this.rotSpeed;
+
+        // Basket Attraction Logic when close to bottom basket
+        const basketCenterX = basketRect.left + basketRect.width / 2;
+        const basketCenterY = basketRect.top + 35;
+
+        const distX = basketCenterX - this.x;
+        const distY = basketCenterY - this.y;
+        const distance = Math.sqrt(distX * distX + distY * distY);
+
+        // Gentle magnetic pull if item gets close to moving basket
+        if (distance < 160 && this.y > basketRect.top - 80) {
+          this.x += distX * 0.1;
+          this.speedY = Math.max(this.speedY, 3.8);
+        }
+
+        // Collection Threshold inside moving basket
+        if (distance < 45 || (this.y >= basketCenterY - 10 && Math.abs(distX) < 70)) {
+          this.catchInBasket(basketCenterX, basketCenterY);
+        } else if (this.y > window.innerHeight + 50) {
+          this.reset();
+        }
+
+        this.element.style.transform = `translate3d(${this.x}px, ${this.y}px, 0) rotate(${this.rotation}deg) scale(${this.scale})`;
+      }
+
+      catchInBasket(cx, cy) {
+        this.collected = true;
+        
+        // Trigger Basket Bounce Animation
+        basketEl.classList.remove('basket-bounce');
+        void basketEl.offsetWidth; // Trigger reflow
+        basketEl.classList.add('basket-bounce');
+
+        // Spawn "+1 Meal Rescued" Popup
+        spawnPlusOnePopup(cx, cy);
+
+        // Update State & Counters
+        mealsRescuedCount++;
+        if (heroCounterMeals) heroCounterMeals.innerText = mealsRescuedCount;
+        if (heroCounterWaste) heroCounterWaste.innerText = (mealsRescuedCount * 0.4).toFixed(1);
+
+        // Add resting item inside basket SVG container
+        addRestingItemToBasket(this.emoji);
+
+        // Reset particle to top after brief delay
+        setTimeout(() => this.reset(), 300);
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       SPECIAL BOTTOM BUTTON TOGGLE LOGIC
+       -------------------------------------------------------------------------- */
+    const fallingContainer = document.getElementById('falling-food-container');
+    const specialRescueBtn = document.getElementById('special-rescue-btn');
+    const specialBtnText = document.getElementById('special-btn-text');
+    const specialBtnIcon = document.getElementById('special-btn-icon');
+    
+    let isFoodFallingActive = false;
+    let animationFrameId = null;
+
+    // Initially hide falling container
+    if (fallingContainer) fallingContainer.style.display = 'none';
+
+    function toggleFoodRescueGame() {
+      isFoodFallingActive = !isFoodFallingActive;
+
+      if (isFoodFallingActive) {
+        // Activate falling food & basket
+        if (fallingContainer) fallingContainer.style.display = 'block';
+        if (basketWrapper) basketWrapper.classList.add('active');
+        if (specialRescueBtn) specialRescueBtn.classList.add('active');
+        
+        if (specialBtnText) specialBtnText.innerText = 'Stop Catching Food';
+        if (specialBtnIcon) specialBtnIcon.innerText = '🧺';
+
+        // Initialize particles if pool is empty
+        if (activeParticles.length === 0 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          for (let i = 0; i < MAX_ACTIVE_ITEMS; i++) {
+            activeParticles.push(new FoodParticle());
+          }
+        } else {
+          // Reset particle positions to fall fresh from top
+          activeParticles.forEach(p => p.reset(true));
+        }
+
+        // Start animation loop
+        if (!animationFrameId) {
+          animationFrameId = requestAnimationFrame(animateParticles);
+        }
+      } else {
+        // Deactivate falling food & basket
+        if (fallingContainer) fallingContainer.style.display = 'none';
+        if (basketWrapper) basketWrapper.classList.remove('active');
+        if (specialRescueBtn) specialRescueBtn.classList.remove('active');
+
+        if (specialBtnText) specialBtnText.innerText = 'Start Food Rescue!';
+        if (specialBtnIcon) specialBtnIcon.innerText = '🍎';
+
+        // Cancel animation loop
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+      }
+    }
+
+    if (specialRescueBtn) {
+      specialRescueBtn.addEventListener('click', toggleFoodRescueGame);
+    }
+
+    // Main Animation Loop
+    function animateParticles() {
+      if (!isFoodFallingActive) return;
+
+      // Auto-glide basket toward lowest falling fruit when user isn't actively controlling mouse
+      if (!isUserControlling) {
+        let lowestP = null;
+        let maxY = -1;
+        for (let p of activeParticles) {
+          if (!p.collected && p.y > maxY && p.y < window.innerHeight - 30) {
+            maxY = p.y;
+            lowestP = p;
+          }
+        }
+        if (lowestP) {
+          basketTargetX = lowestP.x;
+        }
+      }
+
+      // Clamp target within screen boundaries
+      const halfW = 115;
+      basketTargetX = Math.max(halfW, Math.min(window.innerWidth - halfW, basketTargetX));
+
+      // Lerp smooth movement
+      basketCurrentX += (basketTargetX - basketCurrentX) * 0.14;
+      if (basketWrapper) {
+        basketWrapper.style.left = `${basketCurrentX}px`;
+      }
+
+      const basketRect = basketWrapper.getBoundingClientRect();
+      for (let p of activeParticles) {
+        p.update(basketRect);
+      }
+      
+      animationFrameId = requestAnimationFrame(animateParticles);
+    }
+
+    /* --------------------------------------------------------------------------
+       3. BASKET RESTING ITEMS & POPUP HELPER
+       -------------------------------------------------------------------------- */
+    function spawnPlusOnePopup(x, y) {
+      const popup = document.createElement('div');
+      popup.className = 'plus-one-popup';
+      popup.innerText = '+1 Meal Rescued!';
+      popup.style.left = `${x}px`;
+      popup.style.top = `${y}px`;
+      document.body.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 1200);
+    }
+
+    function addRestingItemToBasket(emoji) {
+      if (restingItemsInBasket.length >= MAX_RESTING_ITEMS) {
+        const first = basketContents.querySelector('.resting-food-item');
+        if (first) first.remove();
+        restingItemsInBasket.shift();
+      }
+
+      const item = document.createElement('span');
+      item.className = 'resting-food-item';
+      item.innerText = emoji;
+      item.style.fontSize = '24px';
+      basketContents.appendChild(item);
+      restingItemsInBasket.push(emoji);
+    }
+
+    /* --------------------------------------------------------------------------
+       4. THEME TOGGLE (LIGHT / DARK MODE)
+       -------------------------------------------------------------------------- */
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        if (themeIcon) themeIcon.innerText = newTheme === 'dark' ? '☀️' : '🌙';
+      });
+    }
+
+    /* --------------------------------------------------------------------------
+       5. MOBILE NAVIGATION MENU DRAWER
+       -------------------------------------------------------------------------- */
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const navLinks = document.getElementById('nav-links');
+
+    if (menuToggle && navLinks) {
+      menuToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+      });
+    }
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (navLinks) navLinks.classList.remove('active');
+      });
+    });
+
+    /* --------------------------------------------------------------------------
+       5b. LEFT SIDE PANEL MENU DRAWER TOGGLE
+       -------------------------------------------------------------------------- */
+    function openSidePanel() {
+      const drawer = document.getElementById('side-panel-drawer');
+      const backdrop = document.getElementById('side-panel-backdrop');
+      if (drawer) drawer.classList.add('active');
+      if (backdrop) backdrop.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidePanel() {
+      const drawer = document.getElementById('side-panel-drawer');
+      const backdrop = document.getElementById('side-panel-backdrop');
+      if (drawer) drawer.classList.remove('active');
+      if (backdrop) backdrop.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    /* --------------------------------------------------------------------------
+       6. INTERSECTION OBSERVER FOR SCROLL REVEAL & COUNTERS
+       -------------------------------------------------------------------------- */
+    const observerOptions = { threshold: 0.25 };
+    const impactObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateCounter('impact-meals', 12450);
+          animateCounter('impact-waste', 4980);
+          animateCounter('impact-points', 185000);
+          animateCounter('impact-drives', 64);
+          impactObserver.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    const impactSection = document.getElementById('impact');
+    if (impactSection) impactObserver.observe(impactSection);
+
+    function animateCounter(id, target) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let current = 0;
+      const step = Math.ceil(target / 40);
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+          el.innerText = target.toLocaleString();
+          clearInterval(timer);
+        } else {
+          el.innerText = current.toLocaleString();
+        }
+      }, 30);
+    }
+
+    /* --------------------------------------------------------------------------
+       7. SIGNUP FORM VALIDATION & HANDLING
+       -------------------------------------------------------------------------- */
+    function handleSignup(e) {
+      e.preventDefault();
+      const form = document.getElementById('signup-form');
+      const toast = document.getElementById('form-success-toast');
+
+      if (form.checkValidity()) {
+        toast.style.display = 'block';
+        form.reset();
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, 5000);
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       8. INTERACTIVE HERO WORKFLOW SIMULATOR
+       -------------------------------------------------------------------------- */
+    const simSteps = [
+      {
+        role: "donor",
+        tag: "Step 1 of 3 (Donor)",
+        pillClass: "status-available",
+        pillText: "● AVAILABLE FOR RESCUE",
+        title: "50 Servings Fresh Veg Curry & Rice",
+        meta: "📍 Campus Central Canteen • ⌛ Expires in <span class='sim-timer-glow'>2h 15m</span>",
+        progress: 33,
+        desc: "Donor posts surplus food listing with pickup location and live expiry timer. Automated alert dispatched to nearby volunteers."
+      },
+      {
+        role: "courier",
+        tag: "Step 2 of 3 (Courier)",
+        pillClass: "status-claimed",
+        pillText: "● CLAIMED BY VOLUNTEER",
+        title: "Courier Alex en route for pickup",
+        meta: "🚴 Transit to Hope Shelter • ⏱️ Pickup ETA: 12 min",
+        progress: 66,
+        desc: "Student volunteer claims the listing on the map, collects sanitized food containers, and initiates optimal delivery route."
+      },
+      {
+        role: "ngo",
+        tag: "Step 3 of 3 (NGO Shelter)",
+        pillClass: "status-distributed",
+        pillText: "● DELIVERED & DISTRIBUTED",
+        title: "50 Meals Served at Hope Shelter",
+        meta: "🏢 Hope Community Kitchen • 🌟 Verified Impact",
+        progress: 100,
+        desc: "NGO center receives fresh hot meals, confirms receipt on portal, and updates live community impact scoreboard."
+      }
+    ];
+
+    let currentSimIndex = 0;
+
+    function renderSimStep(index) {
+      const step = simSteps[index];
+      currentSimIndex = index;
+
+      document.querySelectorAll('.sim-tab').forEach(t => t.classList.remove('active'));
+      const activeTab = document.getElementById(`sim-tab-${step.role}`);
+      if (activeTab) activeTab.classList.add('active');
+
+      const tagEl = document.getElementById('sim-step-tag');
+      if (tagEl) tagEl.innerText = step.tag;
+      
+      const pill = document.getElementById('sim-status-pill');
+      if (pill) {
+        pill.className = `sim-status-pill ${step.pillClass}`;
+        pill.innerText = step.pillText;
+      }
+
+      const titleEl = document.getElementById('sim-title');
+      if (titleEl) titleEl.innerText = step.title;
+
+      const metaEl = document.getElementById('sim-meta');
+      if (metaEl) metaEl.innerHTML = step.meta;
+
+      const barEl = document.getElementById('sim-progress-bar');
+      if (barEl) barEl.style.width = `${step.progress}%`;
+
+      const descEl = document.getElementById('sim-desc');
+      if (descEl) descEl.innerText = step.desc;
+
+      const btn = document.getElementById('sim-action-btn');
+      if (btn) {
+        btn.innerText = index === 2 ? "🔄 Reset Simulation" : "⚡ Next Stage";
+      }
+
+      const portalBtn = document.getElementById('sim-portal-btn');
+      if (portalBtn) {
+        portalBtn.setAttribute('onclick', `launchPortalWithRole('${step.role}')`);
+        portalBtn.innerText = step.role === 'donor' 
+          ? '👨‍🍳 Execute Donor Posting ➔' 
+          : step.role === 'courier' 
+          ? '🚴 Accept Courier Pickup ➔' 
+          : '🏢 Confirm NGO Delivery ➔';
+      }
+    }
+
+    function switchSimRole(roleKey) {
+      const idx = simSteps.findIndex(s => s.role === roleKey);
+      if (idx !== -1) renderSimStep(idx);
+    }
+
+    function nextSimStep() {
+      const nextIdx = (currentSimIndex + 1) % simSteps.length;
+      renderSimStep(nextIdx);
+    }
+
+    /* --------------------------------------------------------------------------
+       9. INTERACTIVE IMPACT CALCULATOR
+       -------------------------------------------------------------------------- */
+    function updateImpactCalc(mealsPerDay) {
+      const val = Number(mealsPerDay);
+      const display = document.getElementById('calc-slider-val');
+      if (display) display.innerText = `${val} Meals / Day`;
+
+      const monthlyMeals = val * 30;
+      const wasteKg = Math.round(monthlyMeals * 0.40);
+      const co2eKg = Math.round(monthlyMeals * 1.0);
+      const points = monthlyMeals * 15;
+
+      const elMeals = document.getElementById('calc-res-meals');
+      const elWaste = document.getElementById('calc-res-waste');
+      const elCo2 = document.getElementById('calc-res-co2');
+      const elPoints = document.getElementById('calc-res-points');
+
+      if (elMeals) elMeals.innerText = monthlyMeals.toLocaleString();
+      if (elWaste) elWaste.innerText = `${wasteKg.toLocaleString()} kg`;
+      if (elCo2) elCo2.innerText = `${co2eKg.toLocaleString()} kg`;
+      if (elPoints) elPoints.innerText = points.toLocaleString();
+    }
+
+    /* --------------------------------------------------------------------------
+       10. LANDING PAGE AUTHENTICATION & PORTAL NAVIGATION
+       -------------------------------------------------------------------------- */
+    function openLandingAuthModal(tab = 'login') {
+      const modal = document.getElementById('landing-auth-modal');
+      if (modal) modal.style.display = 'flex';
+      switchLandingAuthTab(tab);
+    }
+
+    function closeLandingAuthModal() {
+      const modal = document.getElementById('landing-auth-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function switchLandingAuthTab(tab) {
+      const tabLogin = document.getElementById('landing-tab-login');
+      const tabReg = document.getElementById('landing-tab-register');
+      const tabDemo = document.getElementById('landing-tab-demo');
+      if (tabLogin) tabLogin.classList.toggle('active', tab === 'login');
+      if (tabReg) tabReg.classList.toggle('active', tab === 'register');
+      if (tabDemo) tabDemo.classList.toggle('active', tab === 'demo');
+
+      const fLogin = document.getElementById('landing-login-form');
+      const fReg = document.getElementById('landing-reg-form');
+      const dList = document.getElementById('landing-demo-list');
+      if (fLogin) fLogin.style.display = tab === 'login' ? 'flex' : 'none';
+      if (fReg) fReg.style.display = tab === 'register' ? 'flex' : 'none';
+      if (dList) dList.style.display = tab === 'demo' ? 'flex' : 'none';
+    }
+
+    function handleLandingLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('landing-login-email').value.trim();
+      const role = document.getElementById('landing-login-role').value;
+      const name = email.split('@')[0].replace(/[._]/g, ' ');
+      const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+
+      const userObj = {
+        id: role === 'donor' ? 1 : role === 'volunteer' ? 2 : 3,
+        email: email.toLowerCase(),
+        name: formattedName,
+        role: role,
+        org: role === 'donor' ? 'Campus Canteen' : role === 'volunteer' ? 'Swift Rescue Network' : 'Hope Shelter Kitchen'
+      };
+
+      try {
+        localStorage.setItem('fb_auth_user', JSON.stringify(userObj));
+      } catch (_err) {}
+
+      window.location.href = 'portal.html';
+    }
+
+    function handleLandingRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('landing-reg-name').value.trim();
+      const email = document.getElementById('landing-reg-email').value.trim();
+      const role = document.getElementById('landing-reg-role').value;
+      const org = document.getElementById('landing-reg-org').value.trim() || `${name}'s Organization`;
+
+      const userObj = {
+        id: Date.now(),
+        email: email.toLowerCase(),
+        name: name,
+        role: role,
+        org: org
+      };
+
+      try {
+        localStorage.setItem('fb_auth_user', JSON.stringify(userObj));
+      } catch (_err) {}
+
+      window.location.href = 'portal.html';
+    }
+
+    function quickAuthDemo(email, name, role, org) {
+      const userObj = { id: role === 'donor' ? 1 : role === 'volunteer' ? 2 : 3, email, name, role, org };
+      try {
+        localStorage.setItem('fb_auth_user', JSON.stringify(userObj));
+      } catch (_err) {}
+      window.location.href = 'portal.html';
+    }
+
+    function launchPortalWithRole(roleKey) {
+      try {
+        const saved = localStorage.getItem('fb_auth_user');
+        let user = saved ? JSON.parse(saved) : null;
+        if (!user) {
+          user = {
+            id: roleKey === 'donor' ? 1 : roleKey === 'volunteer' ? 2 : 3,
+            name: roleKey === 'donor' ? 'Campus Canteen Manager' : roleKey === 'volunteer' ? 'Courier Alex' : 'Hope Shelter Staff',
+            email: `${roleKey}@foodbridge.org`,
+            role: roleKey,
+            org: roleKey === 'donor' ? 'Green Valley Canteen' : roleKey === 'volunteer' ? 'Swift Rescue Network' : 'Hope Community Shelter'
+          };
+        } else {
+          user.role = roleKey;
+        }
+        localStorage.setItem('fb_auth_user', JSON.stringify(user));
+      } catch (_err) {}
+      window.location.href = 'portal.html';
+    }
+
+    /* --------------------------------------------------------------------------
+       11. USER PROFILE MODAL & STATE MANAGEMENT
+       -------------------------------------------------------------------------- */
+    function openProfileModal() {
+      updateProfileModalContent();
+      const modal = document.getElementById('user-profile-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeProfileModal() {
+      const modal = document.getElementById('user-profile-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function updateProfileModalContent() {
+      const saved = localStorage.getItem('fb_auth_user');
+      let user = saved ? JSON.parse(saved) : null;
+      const isGuest = !user;
+
+      if (!user) {
+        user = {
+          name: 'Guest Advocate',
+          email: 'guest@foodbridge.org',
+          role: 'donor',
+          org: 'Community Member'
+        };
+      }
+
+      const avatarEl = document.getElementById('modal-profile-avatar');
+      const nameEl = document.getElementById('modal-profile-name');
+      const emailEl = document.getElementById('modal-profile-email');
+      const badgeEl = document.getElementById('modal-profile-badge');
+      const statusEl = document.getElementById('modal-profile-status');
+
+      if (nameEl) nameEl.innerText = user.name || 'FoodBridge Member';
+      if (emailEl) emailEl.innerText = user.email || 'user@foodbridge.org';
+      if (statusEl) {
+        statusEl.innerText = isGuest ? '⚪ Guest Profile Mode' : '🟢 Active Authenticated Session';
+        statusEl.style.color = isGuest ? 'var(--text-muted)' : '#10B981';
+      }
+
+      const roleKey = (user.role || 'donor').toLowerCase();
+      const roleUpper = roleKey.toUpperCase();
+      const roleIcon = roleKey === 'donor' ? '👨‍🍳' : roleKey === 'volunteer' ? '🚴' : '🏢';
+      if (badgeEl) {
+        badgeEl.innerText = `${roleIcon} ${roleUpper} • ${user.org || 'FoodBridge Network'}`;
+      }
+
+      const initials = (user.name || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      if (avatarEl) avatarEl.innerText = initials || '👤';
+
+      // Update navbar button label & avatar
+      const navAvatar = document.getElementById('nav-profile-avatar');
+      const navLabel = document.getElementById('nav-profile-label');
+      if (navAvatar) navAvatar.innerText = initials || '👤';
+      if (navLabel) navLabel.innerText = isGuest ? 'Profile' : user.name.split(' ')[0];
+    }
+
+    function launchPortalWithSavedRole() {
+      const saved = localStorage.getItem('fb_auth_user');
+      if (!saved) {
+        launchPortalWithRole('donor');
+      } else {
+        window.location.href = 'portal.html';
+      }
+    }
+
+    function handleProfileSignOut() {
+      localStorage.removeItem('fb_auth_user');
+      updateProfileModalContent();
+      closeProfileModal();
+    }
+
+    // Auto-update profile nav button and initialize live simulation on script execution
+    document.addEventListener('DOMContentLoaded', () => {
+      updateProfileModalContent();
+      if (typeof renderSimStep === 'function') renderSimStep(0);
+    });
+    // Immediate fallback in case DOMContentLoaded already fired
+    setTimeout(() => {
+      updateProfileModalContent();
+      if (typeof renderSimStep === 'function') renderSimStep(0);
+    }, 100);
+  </script>
+
+  <!-- LANDING PAGE EMAIL AUTHENTICATION MODAL -->
+  <div id="landing-auth-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(11,19,43,0.85); backdrop-filter:blur(16px); z-index:9999; align-items:center; justify-content:center; padding:1.5rem;">
+    <div class="card" style="max-width: 500px; width: 100%; position: relative; background: var(--bg-surface); border: 1px solid var(--border-glow); box-shadow: var(--shadow-lg); border-radius: var(--radius-lg); padding: 2rem;">
+      <button onclick="closeLandingAuthModal()" style="position:absolute; top:1.25rem; right:1.25rem; background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <span class="section-tag">Portal Authentication</span>
+        <h3 style="font-size: 1.5rem; color: var(--text-dark); margin-top: 0.4rem;">Sign In to FoodBridge</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">Authenticate or register to access your role's operational rescue steps.</p>
+      </div>
+
+      <!-- Auth Navigation Tabs -->
+      <div style="display:flex; gap:0.5rem; background:var(--bg-subtle); padding:0.35rem; border-radius:var(--radius-full); margin-bottom:1.5rem;">
+        <button id="landing-tab-login" onclick="switchLandingAuthTab('login')" class="sim-tab active" style="flex:1;">🔑 Sign In</button>
+        <button id="landing-tab-register" onclick="switchLandingAuthTab('register')" class="sim-tab" style="flex:1;">📝 Register</button>
+        <button id="landing-tab-demo" onclick="switchLandingAuthTab('demo')" class="sim-tab" style="flex:1;">⚡ Demo Accounts</button>
+      </div>
+
+      <!-- Form Login -->
+      <form id="landing-login-form" onsubmit="handleLandingLogin(event)" style="display:flex; flex-direction:column; gap:1rem;">
+        <div>
+          <label class="form-label">Email Address *</label>
+          <input type="email" id="landing-login-email" required placeholder="canteen@foodbridge.org" class="form-control">
+        </div>
+        <div>
+          <label class="form-label">Operational Role *</label>
+          <select id="landing-login-role" class="form-control">
+            <option value="donor">Food Donor (Restaurant / Canteen / Event)</option>
+            <option value="volunteer">Volunteer Courier (Rescue Logistics)</option>
+            <option value="ngo">NGO Community Shelter Hub</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">Authenticate &amp; Open Portal ➔</button>
+      </form>
+
+      <!-- Form Register -->
+      <form id="landing-reg-form" onsubmit="handleLandingRegister(event)" style="display:none; flex-direction:column; gap:1rem;">
+        <div>
+          <label class="form-label">Full Name *</label>
+          <input type="text" id="landing-reg-name" required placeholder="Alex Rivera" class="form-control">
+        </div>
+        <div>
+          <label class="form-label">Email Address *</label>
+          <input type="email" id="landing-reg-email" required placeholder="alex@swiftrescue.org" class="form-control">
+        </div>
+        <div>
+          <label class="form-label">Operational Role *</label>
+          <select id="landing-reg-role" class="form-control">
+            <option value="donor">Food Donor (Canteen / Bakery / Caterer)</option>
+            <option value="volunteer" selected>Volunteer Courier (Rescue Logistics)</option>
+            <option value="ngo">Community NGO / Shelter Center</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Facility / Organization Name</label>
+          <input type="text" id="landing-reg-org" placeholder="Swift Rescue Network" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">Create Account &amp; Open Portal ➔</button>
+      </form>
+
+      <!-- Quick Demo Accounts -->
+      <div id="landing-demo-list" style="display:none; flex-direction:column; gap:0.75rem;">
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">Click any 1-click test account to authenticate &amp; launch dashboard:</p>
+        <div onclick="quickAuthDemo('canteen@foodbridge.org', 'Campus Canteen Manager', 'donor', 'Green Valley Dining')" class="card" style="padding:0.85rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-weight:700; font-size:0.9rem; color:var(--text-dark);">canteen@foodbridge.org</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">Donor &bull; Green Valley Canteen</div>
+          </div>
+          <span class="section-tag" style="margin:0; padding:0.2rem 0.5rem;">DONOR</span>
+        </div>
+        <div onclick="quickAuthDemo('courier.alex@foodbridge.org', 'Courier Alex', 'volunteer', 'Swift Rescue Network')" class="card" style="padding:0.85rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-weight:700; font-size:0.9rem; color:var(--text-dark);">courier.alex@foodbridge.org</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">Volunteer Courier &bull; Swift Rescue</div>
+          </div>
+          <span class="section-tag" style="margin:0; padding:0.2rem 0.5rem; background:rgba(245,158,11,0.15); color:#D97706;">VOLUNTEER</span>
+        </div>
+        <div onclick="quickAuthDemo('shelter.hope@foodbridge.org', 'Hope Shelter Staff', 'ngo', 'Hope Community Shelter')" class="card" style="padding:0.85rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-weight:700; font-size:0.9rem; color:var(--text-dark);">shelter.hope@foodbridge.org</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">NGO Shelter &bull; Hope Kitchen</div>
+          </div>
+          <span class="section-tag" style="margin:0; padding:0.2rem 0.5rem; background:rgba(6,182,212,0.15); color:#0891B2;">NGO</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LANDING PAGE USER PROFILE MODAL -->
+  <div id="user-profile-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(11,19,43,0.85); backdrop-filter:blur(16px); z-index:9999; align-items:center; justify-content:center; padding:1.5rem;">
+    <div class="card" style="max-width: 480px; width: 100%; position: relative; background: var(--bg-surface); border: 1px solid var(--border-glow); box-shadow: var(--shadow-lg); border-radius: var(--radius-lg); padding: 2rem;">
+      <button onclick="closeProfileModal()" style="position:absolute; top:1.25rem; right:1.25rem; background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+      
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div id="modal-profile-avatar" style="width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg, var(--primary), #10B981); color:#ffffff; display:inline-flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:700; margin:0 auto 0.8rem; box-shadow:0 8px 24px rgba(16,185,129,0.3); border:3px solid #ffffff;">
+          👤
+        </div>
+        <h3 id="modal-profile-name" style="font-size: 1.4rem; color: var(--text-dark); margin-bottom:0.15rem;">Guest Member</h3>
+        <p id="modal-profile-email" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom:0.5rem;">guest@foodbridge.org</p>
+        <div id="modal-profile-status" style="font-size: 0.78rem; font-weight:700; margin-bottom:0.75rem;">🟢 Active Session</div>
+        <span id="modal-profile-badge" class="section-tag" style="margin:0; padding:0.3rem 0.85rem; font-size:0.78rem;">
+          👨‍🍳 DONOR ROLE
+        </span>
+      </div>
+
+      <!-- Quick Metrics Summary -->
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.75rem; background:var(--bg-subtle); padding:1rem; border-radius:var(--radius-md); margin-bottom:1.5rem; text-align:center;">
+        <div>
+          <div style="font-size:1.1rem; font-weight:700; color:var(--primary);" id="modal-stat-meals">124+</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Meals Saved</div>
+        </div>
+        <div>
+          <div style="font-size:1.1rem; font-weight:700; color:var(--accent-amber);" id="modal-stat-points">1,850</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Impact Pts</div>
+        </div>
+        <div>
+          <div style="font-size:1.1rem; font-weight:700; color:var(--accent-cyan);" id="modal-stat-badge">Gold</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Tier Badge</div>
+        </div>
+      </div>
+
+      <!-- Profile Actions -->
+      <div style="display:flex; flex-direction:column; gap:0.75rem;">
+        <button onclick="launchPortalWithSavedRole()" class="btn btn-primary" style="width:100%; justify-content:center;">
+          🚀 Open Operational Dashboard ➔
+        </button>
+        <button onclick="closeProfileModal(); openLandingAuthModal('login');" class="btn btn-secondary" style="width:100%; justify-content:center;">
+          🔑 Switch Account / Sign In
+        </button>
+        <button onclick="handleProfileSignOut()" class="btn" style="width:100%; justify-content:center; background:rgba(239,68,68,0.1); color:#EF4444; border:1px solid rgba(239,68,68,0.2);">
+          🚪 Sign Out Session
+        </button>
+      </div>
+
+    </div>
+  </div>
+</body>
 </html>

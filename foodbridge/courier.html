@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courier Portal | FoodBridge Zero Waste Network</title>
+  <meta name="description" content="Volunteer couriers register availability, accept urgent food rescue requests, navigate delivery routes, and deliver meals to local shelters.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- STICKY NAVBAR -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button id="mobile-menu-toggle" class="btn btn-icon mobile-toggle" aria-label="Toggle Navigation Menu">☰</button>
+        <a href="index.html" class="brand-logo" aria-label="FoodBridge Home">
+          <svg class="brand-icon" viewBox="0 0 64 64" fill="none">
+            <rect x="2" y="2" width="60" height="60" rx="18" fill="#2E7D4F" fill-opacity="0.15" stroke="#2E7D4F" stroke-width="1.5" />
+            <path d="M 10 48 Q 32 24 54 48" stroke="#2E7D4F" stroke-width="5" stroke-linecap="round" fill="none" />
+            <circle cx="32" cy="28" r="10" fill="#E4572E" />
+          </svg>
+          <span>FoodBridge</span>
+        </a>
+      </div>
+
+      <nav>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="index.html#home" class="nav-link">Home</a></li>
+          <li><a href="index.html#problem" class="nav-link">The Problem</a></li>
+          <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="index.html#impact" class="nav-link">Impact</a></li>
+          <li class="nav-dropdown-wrapper">
+            <a href="#" class="nav-link" aria-current="page" style="display:flex; align-items:center; gap:0.3rem;">
+              <span>Take Action</span> <span style="font-size:0.75rem;">▼</span>
+            </a>
+            <div class="nav-dropdown-menu">
+              <a href="donate.html" class="nav-dropdown-item">👨‍🍳 Donate Surplus Food</a>
+              <a href="courier.html" class="nav-dropdown-item" aria-current="page">🚴 Courier Portal</a>
+              <a href="ngo-hub.html" class="nav-dropdown-item">🏢 NGO Shelter Hub</a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <button id="theme-toggle" class="btn btn-icon" aria-label="Toggle Dark/Light Mode" title="Toggle Theme">
+          <span id="theme-icon">🌙</span>
+        </button>
+        <a href="portal.html" class="btn btn-primary btn-sm">🚀 Open Portal ➔</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- COMPACT HERO BANNER -->
+  <section class="compact-hero">
+    <div class="container compact-hero-content">
+      <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
+        <a href="index.html">Home</a> <span>/</span> <span>Take Action</span> <span>/</span> <span style="color:var(--accent-amber); font-weight:700;">Courier Portal</span>
+      </nav>
+      <h1 class="section-title">🚴 Volunteer Courier Portal</h1>
+      <p class="section-subtitle mx-auto">
+        Claim urgent food rescue requests, navigate optimal transit routes, and deliver fresh meals before expiry timers run out.
+      </p>
+
+      <!-- Rescue Chain Role Mini-Diagram -->
+      <div id="rescue-chain-diagram"></div>
+    </div>
+  </section>
+
+  <!-- MAIN COURIER CONTENT -->
+  <main class="container" style="padding: 3.5rem 1.5rem;">
+
+    <!-- TOP SECTION: COURIER PROFILE & STATS PANEL -->
+    <div style="display:grid; grid-template-columns: 1fr 2fr; gap:1.5rem; margin-bottom: 3.5rem;">
+      
+      <!-- COURIER PROFILE & ONLINE TOGGLE CARD -->
+      <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <span class="section-tag" style="background:var(--accent-mango-alpha); color:#B45309;">Courier Profile</span>
+            
+            <!-- Available Now Switch -->
+            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:800; font-size:0.85rem;" id="online-toggle-label">
+              <input type="checkbox" id="courier-online-switch" checked onchange="toggleCourierOnlineState(this.checked)">
+              <span id="online-status-text" style="color:var(--primary);">🟢 Available Now</span>
+            </label>
+          </div>
+
+          <h3 style="font-size:1.4rem; margin-bottom:0.2rem; color:var(--text-dark);" id="courier-profile-name">Alex Rivera</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;" id="courier-profile-area">🚲 Bicycle &bull; 90210 Downtown District</p>
+
+          <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem;">
+            <div><strong>Carrying Capacity:</strong> <span id="courier-capacity">35 kg / 50 meals</span></div>
+            <div><strong>Insulated Thermal Bag:</strong> <span id="courier-bag">✅ Available</span></div>
+            <div><strong>Availability Window:</strong> <span id="courier-window">Mon-Fri 2 PM - 8 PM</span></div>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary btn-sm" style="margin-top:1.5rem;" onclick="openEditCourierModal()">✏️ Edit Profile &amp; Vehicle</button>
+      </div>
+
+      <!-- COURIER STATS & BADGES PANEL -->
+      <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <span class="section-tag" style="align-self:flex-start;">Impact Scoreboard</span>
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem; text-align:center; margin:1rem 0;">
+          <div style="background:var(--bg-subtle); padding:1rem; border-radius:var(--radius-md);">
+            <div style="font-family:var(--font-heading); font-size:1.8rem; font-weight:800; color:var(--primary);" id="stat-completed-count">42</div>
+            <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">Deliveries Done</div>
+          </div>
+          <div style="background:var(--bg-subtle); padding:1rem; border-radius:var(--radius-md);">
+            <div style="font-family:var(--font-heading); font-size:1.8rem; font-weight:800; color:var(--accent-amber);" id="stat-meals-count">840</div>
+            <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">Meals Rescued</div>
+          </div>
+          <div style="background:var(--bg-subtle); padding:1rem; border-radius:var(--radius-md);">
+            <div style="font-family:var(--font-heading); font-size:1.8rem; font-weight:800; color:var(--accent-cyan);" id="stat-ontime-rate">98%</div>
+            <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">On-Time Rate</div>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="font-size:0.9rem; font-weight:700; margin-bottom:0.5rem;">Earned Courier Badges</h4>
+          <div style="display:flex; flex-wrap:wrap; gap:0.5rem;" id="courier-badges-list">
+            <span class="section-tag" style="background:rgba(246,166,35,0.2); color:#B45309; margin:0;">🥇 First Rescue</span>
+            <span class="section-tag" style="background:rgba(6,182,212,0.2); color:#0891B2; margin:0;">⚡ Speedy Courier</span>
+            <span class="section-tag" style="background:rgba(46,125,79,0.2); color:var(--primary); margin:0;">🌿 Eco Hero</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ACTIVE DELIVERY TRACKER (SHOWN WHEN COURIER HAS ACTIVE DISPATCH) -->
+    <section id="active-delivery-section" style="display:none; margin-bottom: 4rem;">
+      <div class="card" style="border: 2px solid var(--accent-mango); background: var(--bg-surface);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div>
+            <span class="section-tag" style="background:var(--accent-mango-alpha); color:#B45309;">Active Dispatch in Progress</span>
+            <h2 style="font-size:1.6rem; margin-top:0.2rem;" id="active-delivery-title">50 Servings Fresh Veg Curry</h2>
+          </div>
+          <button class="btn btn-tomato btn-sm" onclick="reportDeliveryIssue()">🚨 Report Issue</button>
+        </div>
+
+        <!-- 4-STEP INTERACTIVE STEPPER -->
+        <div class="tracker-stepper">
+          <div class="tracker-step active" id="track-step-1">
+            <div class="tracker-dot">1</div>
+            <div style="font-size:0.8rem; font-weight:700;">Accepted</div>
+          </div>
+          <div class="tracker-step" id="track-step-2">
+            <div class="tracker-dot">2</div>
+            <div style="font-size:0.8rem; font-weight:700;">Picked Up</div>
+          </div>
+          <div class="tracker-step" id="track-step-3">
+            <div class="tracker-dot">3</div>
+            <div style="font-size:0.8rem; font-weight:700;">In Transit</div>
+          </div>
+          <div class="tracker-step" id="track-step-4">
+            <div class="tracker-dot">4</div>
+            <div style="font-size:0.8rem; font-weight:700;">Delivered</div>
+          </div>
+        </div>
+
+        <!-- SVG ROUTE-LINE ILLUSTRATION -->
+        <div style="background:var(--bg-subtle); padding:1.25rem; border-radius:var(--radius-md); margin:1.5rem 0; text-align:center;">
+          <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.85rem; margin-bottom:0.5rem;">
+            <span>📍 Pickup: Campus Central Canteen</span>
+            <span>🏢 Dropoff: Hope Community Kitchen</span>
+          </div>
+          
+          <svg viewBox="0 0 600 30" width="100%" height="30">
+            <line x1="20" y1="15" x2="580" y2="15" stroke="#E2D7C3" stroke-width="4" stroke-dasharray="6 6"/>
+            <circle cx="20" cy="15" r="8" fill="#2E7D4F"/>
+            <circle id="route-courier-node" cx="200" cy="15" r="10" fill="#F6A623"/>
+            <circle cx="580" cy="15" r="8" fill="#06B6D4"/>
+          </svg>
+        </div>
+
+        <!-- STEPPER ADVANCE ACTION BUTTON -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div style="font-size:0.85rem; color:var(--text-muted);" id="active-delivery-meta">
+            Pickup Window: <strong>12 mins left</strong> &bull; Contact: <strong>Chef Robert (+1 555-019-2831)</strong>
+          </div>
+          
+          <button class="btn btn-primary" id="advance-step-btn" onclick="advanceActiveDelivery()">
+            Mark Picked Up from Donor ➔
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DELIVERY REQUESTS DASHBOARD -->
+    <section style="margin-bottom: 4rem;">
+      <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1.5rem;">
+        <div>
+          <span class="section-tag">Dispatch Requests</span>
+          <h2 style="font-size:1.75rem;">Available Delivery Requests</h2>
+        </div>
+
+        <!-- Sort & Filter Controls -->
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <select id="sort-requests" class="form-control" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem;" onchange="renderDeliveryRequests()">
+            <option value="urgency">Sort by Expiry Urgency</option>
+            <option value="distance">Sort by Distance (Nearest)</option>
+            <option value="quantity">Sort by Meal Quantity</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="requests-board-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:1.25rem;">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- COURIER SAFETY & GUIDELINES -->
+    <section style="margin-bottom: 4rem;">
+      <span class="section-tag">Courier Safety</span>
+      <h2 style="font-size:1.75rem; margin-bottom:1.25rem;">Courier Guidelines &amp; Protocol</h2>
+
+      <div class="accordion-item active">
+        <button class="accordion-header" onclick="this.parentElement.classList.toggle('active')">
+          <span>🚴 Safe Transportation &amp; Thermal Containers</span>
+          <span>▼</span>
+        </button>
+        <div class="accordion-body">
+          Always secure food containers inside insulated thermal bags during transit. Transport hot items separately from chilled raw produce.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-header" onclick="this.parentElement.classList.toggle('active')">
+          <span>⏱️ Timely Delivery Commitments</span>
+          <span>▼</span>
+        </button>
+        <div class="accordion-body">
+          Only accept pickups that fall within your available schedule. If delayed by traffic or weather, notify the donor and NGO immediately using the contact links.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- DELIVERY COMPLETION CELEBRATION MODAL -->
+  <div id="completion-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,26,19,0.85); backdrop-filter:blur(12px); z-index:9999; align-items:center; justify-content:center; padding:1.5rem;">
+    <div class="card" style="max-width:480px; width:100%; text-align:center; padding:2.5rem 2rem;">
+      <div style="font-size:3rem; margin-bottom:1rem;">🎉 🧺</div>
+      <span class="section-tag" style="background:rgba(16,185,129,0.2); color:#059669;">Rescue Completed!</span>
+      <h2 style="font-size:1.8rem; margin-bottom:0.5rem; color:var(--text-dark);">Delivery Confirmed!</h2>
+      <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1.5rem;">
+        Thank you for completing this food rescue mission and delivering fresh meals to the shelter.
+      </p>
+
+      <div style="background:var(--bg-subtle); padding:1rem; border-radius:var(--radius-md); margin-bottom:1.5rem; text-align:left; font-size:0.85rem;">
+        <div><strong>Recipient NGO:</strong> Hope Community Kitchen</div>
+        <div><strong>Rescued Impact:</strong> +50 Meals Saved &bull; 20 kg Waste Diverted</div>
+        <div><strong>Points Earned:</strong> +150 Courier Impact Points 🌟</div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="closeCompletionModal()">Awesome! Back to Courier Dashboard</button>
+    </div>
+  </div>
+
+  <!-- REUSABLE FOOTER -->
+  <footer style="background:var(--bg-surface); border-top:1px solid var(--border-color); padding:3rem 0; text-align:center;">
+    <div class="container">
+      <div style="max-width:200px; margin:0 auto 1.5rem;">
+        <svg viewBox="0 0 240 120" width="160" height="80">
+          <ellipse cx="120" cy="40" rx="90" ry="20" fill="#8C652D"/>
+          <path d="M30 40 C30 90, 60 110, 120 110 C180 110, 210 90, 210 40 Z" fill="#A67C3D"/>
+        </svg>
+      </div>
+      <p style="font-weight:700; font-size:1.1rem; color:var(--text-dark); margin-bottom:0.5rem;">🌿 FoodBridge Zero Food Waste Initiative</p>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">
+        Demo Mode Active &bull; LocalStorage State Synchronization
+      </p>
+      <button class="btn btn-secondary btn-sm" onclick="FoodBridgeApp.resetDemoData()">🔄 Reset Demo Data</button>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    let activeStepNum = 1;
+    let activeListingId = null;
+
+    function toggleCourierOnlineState(isOnline) {
+      const text = document.getElementById('online-status-text');
+      if (text) {
+        text.innerText = isOnline ? '🟢 Available Now' : '⚪ Offline';
+        text.style.color = isOnline ? 'var(--primary)' : 'var(--text-muted)';
+      }
+      FoodBridgeApp.showToast(`Courier status set to ${isOnline ? 'ONLINE' : 'OFFLINE'}`, 'info');
+    }
+
+    function renderDeliveryRequests() {
+      const sortVal = document.getElementById('sort-requests').value;
+      let listings = FoodBridgeApp.getListings({ status: 'available' });
+
+      if (sortVal === 'distance') {
+        listings.sort((a, b) => (a.distanceKm || 1) - (b.distanceKm || 1));
+      } else if (sortVal === 'quantity') {
+        listings.sort((a, b) => b.quantity - a.quantity);
+      } else {
+        listings.sort((a, b) => new Date(a.expiresAt) - new Date(b.expiresAt));
+      }
+
+      const grid = document.getElementById('requests-board-grid');
+      if (!grid) return;
+
+      if (listings.length === 0) {
+        grid.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center;">No available pickup requests. Check back soon!</div>`;
+        return;
+      }
+
+      grid.innerHTML = listings.map(item => {
+        const ring = FoodBridgeApp.calculateExpiryRing(item.expiresAt);
+        const urgencyTag = ring.text.includes('m left') && !ring.text.includes('h')
+          ? `<span class="section-tag" style="background:var(--accent-tomato-alpha); color:var(--accent-tomato);">🚨 Critical &lt; 1 hr</span>`
+          : `<span class="section-tag" style="background:var(--accent-mango-alpha); color:#B45309;">⏳ Soon</span>`;
+
+        return `
+          <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                ${urgencyTag}
+                <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">📍 ${item.distanceKm || 1.8} km away</span>
+              </div>
+              
+              <h3 style="font-size:1.2rem; margin-bottom:0.4rem; color:var(--text-dark);">${item.title}</h3>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem;">
+                🏢 <strong>Pickup:</strong> ${item.donorName} (${item.address})
+              </p>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem;">
+                📦 <strong>Quantity:</strong> ${item.quantity} ${item.unit} (${item.foodCategory})
+              </p>
+            </div>
+
+            <div style="border-top:1px solid var(--border-color); padding-top:0.75rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <svg class="expiry-ring-svg" viewBox="0 0 60 60" style="width:32px; height:32px;">
+                    <circle class="expiry-ring-bg" cx="30" cy="30" r="25"/>
+                    <circle class="expiry-ring-progress" cx="30" cy="30" r="25" stroke="${ring.color}" stroke-dasharray="157" stroke-dashoffset="${ring.dashOffset}"/>
+                  </svg>
+                  <span style="font-size:0.8rem; font-weight:700; color:${ring.color};">${ring.text}</span>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:0.5rem;">
+                <button class="btn btn-primary btn-sm" style="flex:1; justify-content:center;" onclick="acceptDeliveryRequest('${item.id}')">Accept Delivery ➔</button>
+                <button class="btn btn-secondary btn-sm" onclick="declineDeliveryRequest('${item.id}')">Decline</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function acceptDeliveryRequest(listingId) {
+      FoodBridgeApp.updateListingStatus(listingId, 'claimed', { assignedCourierId: 'CR-101', ngoId: 'NGO-301', ngoName: 'Hope Community Kitchen' });
+      activeListingId = listingId;
+      activeStepNum = 1;
+      showActiveDeliverySection();
+      renderDeliveryRequests();
+    }
+
+    function declineDeliveryRequest(listingId) {
+      FoodBridgeApp.showToast(`Delivery request ${listingId} declined.`, 'info');
+      renderDeliveryRequests();
+    }
+
+    function showActiveDeliverySection() {
+      const sec = document.getElementById('active-delivery-section');
+      if (sec) sec.style.display = 'block';
+      updateTrackerStepperUI();
+    }
+
+    function updateTrackerStepperUI() {
+      document.querySelectorAll('.tracker-step').forEach((st, idx) => {
+        if (idx + 1 <= activeStepNum) st.classList.add('active');
+        else st.classList.remove('active');
+      });
+
+      const btn = document.getElementById('advance-step-btn');
+      const node = document.getElementById('route-courier-node');
+
+      if (activeStepNum === 1) {
+        if (btn) btn.innerText = 'Mark Picked Up from Donor ➔';
+        if (node) node.setAttribute('cx', '100');
+      } else if (activeStepNum === 2) {
+        if (btn) btn.innerText = 'Start In-Transit Navigation ➔';
+        if (node) node.setAttribute('cx', '300');
+      } else if (activeStepNum === 3) {
+        if (btn) btn.innerText = 'Confirm Delivered to NGO Shelter ➔';
+        if (node) node.setAttribute('cx', '500');
+      }
+    }
+
+    function advanceActiveDelivery() {
+      if (activeStepNum === 1) {
+        activeStepNum = 2;
+        FoodBridgeApp.updateListingStatus(activeListingId || 'FB-2026-0042', 'picked_up');
+      } else if (activeStepNum === 2) {
+        activeStepNum = 3;
+        FoodBridgeApp.updateListingStatus(activeListingId || 'FB-2026-0042', 'in_transit');
+      } else if (activeStepNum === 3) {
+        activeStepNum = 4;
+        FoodBridgeApp.updateListingStatus(activeListingId || 'FB-2026-0042', 'delivered');
+        document.getElementById('completion-modal').style.display = 'flex';
+        document.getElementById('active-delivery-section').style.display = 'none';
+        return;
+      }
+      updateTrackerStepperUI();
+    }
+
+    function reportDeliveryIssue() {
+      alert('Issue Reported: Emergency alert dispatched to FoodBridge coordinator. Support will contact your phone shortly.');
+    }
+
+    function closeCompletionModal() {
+      document.getElementById('completion-modal').style.display = 'none';
+      renderDeliveryRequests();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderDeliveryRequests();
+    });
+  </script>
+</body>
+</html>
