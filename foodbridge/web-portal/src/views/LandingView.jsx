@@ -184,10 +184,10 @@ export function LandingView({
 
               {/* Two-Tone Headline */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-[-0.035em] leading-[1.08] text-[#16281D]">
-                Turn surplus food{" "}
+                Turn Surplus Food{" "}
                 <span className="text-[#5B7363] font-medium">into</span>{" "}
                 <span className="relative inline-block text-[#16281D]">
-                  community meals.
+                  Community Meals.
                   <ScribbleUnderline color="#F59E0B" className="mt-1" />
                 </span>
               </h1>

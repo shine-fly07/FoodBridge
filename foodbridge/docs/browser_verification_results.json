@@ -79,7 +79,7 @@
   {
     "id": "ABOUT_5_PROJECT_AIMS",
     "element": "About Project & 5 Aims Section",
-    "expected": "Preserves 5 core aims and SDG 2 & 12 mappings",
+    "expected": "Preserves 5 core aims",
     "status": "PASS",
     "notes": ""
   },
@@ -100,28 +100,28 @@
   {
     "id": "ANCHOR_PROBLEM",
     "element": "Problem Anchor (footer a[href=\"#problem\"])",
-    "expected": "Smooth scrolls to #problem (Scroll: 0px -> 2520px)",
+    "expected": "Smooth scrolls to #problem (Scroll: 0px -> 3202px)",
     "status": "PASS",
     "notes": ""
   },
   {
     "id": "ANCHOR_HOWITWORKS",
     "element": "HowItWorks Anchor (footer a[href=\"#how-it-works\"])",
-    "expected": "Smooth scrolls to #how-it-works (Scroll: 0px -> 1477px)",
+    "expected": "Smooth scrolls to #how-it-works (Scroll: 0px -> 2106px)",
     "status": "PASS",
     "notes": ""
   },
   {
     "id": "ANCHOR_IMPACT",
     "element": "Impact Anchor (footer a[href=\"#impact\"])",
-    "expected": "Smooth scrolls to #impact (Scroll: 0px -> 2664px)",
+    "expected": "Smooth scrolls to #impact (Scroll: 0px -> 3347px)",
     "status": "PASS",
     "notes": ""
   },
   {
     "id": "ANCHOR_GETINVOLVED",
     "element": "GetInvolved Anchor (footer a[href=\"#get-involved\"])",
-    "expected": "Smooth scrolls to #get-involved (Scroll: 0px -> 4757px)",
+    "expected": "Smooth scrolls to #get-involved (Scroll: 0px -> 5469px)",
     "status": "PASS",
     "notes": ""
   },
