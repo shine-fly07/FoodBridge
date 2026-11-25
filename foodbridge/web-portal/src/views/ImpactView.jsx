@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Leaf, Utensils, Scale, Award, ShieldAlert, FileText, CheckCircle2, TrendingUp, Calendar } from "lucide-react";
+import { Leaf, Utensils, Scale, FileText, CheckCircle2, TrendingUp, Calendar } from "lucide-react";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Loader } from "../components/ui/Loader";

@@ -100,28 +100,28 @@
   {
     "id": "ANCHOR_PROBLEM",
     "element": "Problem Anchor (footer a[href=\"#problem\"])",
-    "expected": "Smooth scrolls to #problem (Scroll: 0px -> 3202px)",
+    "expected": "Smooth scrolls to #problem (Scroll: 0px -> 3210px)",
     "status": "PASS",
     "notes": ""
   },
   {
     "id": "ANCHOR_HOWITWORKS",
     "element": "HowItWorks Anchor (footer a[href=\"#how-it-works\"])",
-    "expected": "Smooth scrolls to #how-it-works (Scroll: 0px -> 2106px)",
+    "expected": "Smooth scrolls to #how-it-works (Scroll: 0px -> 2159px)",
     "status": "PASS",
     "notes": ""
   },
   {
     "id": "ANCHOR_IMPACT",
     "element": "Impact Anchor (footer a[href=\"#impact\"])",
-    "expected": "Smooth scrolls to #impact (Scroll: 0px -> 3347px)",
+    "expected": "Smooth scrolls to #impact (Scroll: 0px -> 3578px)",
     "status": "PASS",
     "notes": ""
   },
   {
     "id": "ANCHOR_GETINVOLVED",
     "element": "GetInvolved Anchor (footer a[href=\"#get-involved\"])",
-    "expected": "Smooth scrolls to #get-involved (Scroll: 0px -> 5469px)",
+    "expected": "Smooth scrolls to #get-involved (Scroll: 0px -> 5700px)",
     "status": "PASS",
     "notes": ""
   },

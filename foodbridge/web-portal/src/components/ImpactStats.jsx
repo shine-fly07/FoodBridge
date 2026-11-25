@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Utensils, Scale, Leaf, Globe, Building, Award, ShieldAlert } from "lucide-react";
+import { Utensils, Scale, Leaf, Globe, Building } from "lucide-react";
 import { Card } from "./ui/Card";
 import { calculateWasteKg, calculateCo2eKg } from "../constants/impact";
 

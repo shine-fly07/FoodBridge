@@ -57,6 +57,7 @@ function ScrollHandler() {
 }
 
 function MainAppContent() {
+  const location = useLocation();
   const { currentUser, activeRole, setActiveRole, authModalOpen, authModalOptions, openAuthModal, closeAuthModal, logout } = useAuth();
   const { listings, loading, refresh, addListing, claim, collect, distribute, cancel, totalDivertedMeals, availableListings } = useListings();
 
@@ -107,8 +108,9 @@ function MainAppContent() {
 
       {/* Main Route Content */}
       <main id="main-content" className="flex-1 pb-12">
-        <React.Suspense fallback={<Loader text="Loading FoodBridge view..." className="py-20" />}>
-          <Routes>
+        <div key={location.pathname} className="page-enter">
+          <React.Suspense fallback={<Loader text="Loading FoodBridge view..." className="py-20" />}>
+            <Routes>
           {/* Main SPA Pages */}
           <Route
             path="/"
@@ -193,6 +195,7 @@ function MainAppContent() {
           <Route path="*" element={<NotFoundView />} />
         </Routes>
         </React.Suspense>
+        </div>
       </main>
 
       {/* Floating Bottom Navigation Pill */}

@@ -39,19 +39,31 @@ export function LandingHeroStats({ fallbackMeals = 0, fallbackActive = 0 }) {
   if (loading) {
     return (
       <div
-        className="w-full grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6"
+        className="w-full pt-6"
         aria-busy="true"
         aria-label="Loading live impact metrics"
       >
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="p-5 rounded-2xl bg-white/60 border border-[#D6E6DC] animate-pulse space-y-2"
-          >
-            <div className="h-4 w-24 bg-[#D6E6DC] rounded" />
-            <div className="h-8 w-20 bg-[#D6E6DC] rounded" />
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="flex items-center gap-1.5 text-xs font-bold font-['Plus_Jakarta_Sans'] text-[#2E7D4F] uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-[#2E7D4F] animate-pulse" />
+            <span>Live Platform Activity</span>
           </div>
-        ))}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="p-5 rounded-2xl bg-white border border-[#D6E6DC] shadow-xs flex items-center justify-between min-h-[96px] animate-pulse"
+            >
+              <div className="space-y-2">
+                <div className="h-7 w-20 bg-[#E8F0EA] rounded" />
+                <div className="h-3.5 w-32 bg-[#E8F0EA] rounded" />
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-[#E8F0EA] shrink-0" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -73,7 +85,7 @@ export function LandingHeroStats({ fallbackMeals = 0, fallbackActive = 0 }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Stat 1: Meals Rescued */}
-        <div className="p-5 rounded-2xl bg-white border border-[#D6E6DC] shadow-xs flex items-center justify-between hover:shadow-sm transition-shadow">
+        <div className="p-5 rounded-2xl bg-white border border-[#D6E6DC] shadow-xs flex items-center justify-between hover:shadow-sm transition-shadow min-h-[96px]">
           <div>
             <div className="font-['Plus_Jakarta_Sans'] text-2xl sm:text-3xl font-extrabold text-[#16281D]">
               {meals !== null ? meals.toLocaleString() : "-"}
@@ -88,7 +100,7 @@ export function LandingHeroStats({ fallbackMeals = 0, fallbackActive = 0 }) {
         </div>
 
         {/* Stat 2: Waste Diverted */}
-        <div className="p-5 rounded-2xl bg-white border border-[#D6E6DC] shadow-xs flex items-center justify-between hover:shadow-sm transition-shadow">
+        <div className="p-5 rounded-2xl bg-white border border-[#D6E6DC] shadow-xs flex items-center justify-between hover:shadow-sm transition-shadow min-h-[96px]">
           <div>
             <div className="font-['Plus_Jakarta_Sans'] text-2xl sm:text-3xl font-extrabold text-[#E8643C]">
               {wasteKg !== null ? `${wasteKg.toLocaleString()} kg` : "-"}
@@ -103,7 +115,7 @@ export function LandingHeroStats({ fallbackMeals = 0, fallbackActive = 0 }) {
         </div>
 
         {/* Stat 3: Active Listings */}
-        <div className="p-5 rounded-2xl bg-white border border-[#D6E6DC] shadow-xs flex items-center justify-between hover:shadow-sm transition-shadow">
+        <div className="p-5 rounded-2xl bg-white border border-[#D6E6DC] shadow-xs flex items-center justify-between hover:shadow-sm transition-shadow min-h-[96px]">
           <div>
             <div className="font-['Plus_Jakarta_Sans'] text-2xl sm:text-3xl font-extrabold text-[#D97706]">
               {activeCount !== null ? activeCount : "-"}

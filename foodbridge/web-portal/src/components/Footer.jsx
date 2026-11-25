@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Award, ShieldAlert, Heart, Mail, ExternalLink, Gamepad2, ArrowUpRight } from "lucide-react";
+import { Heart, Mail, ExternalLink, Gamepad2, ArrowUpRight } from "lucide-react";
 import { Logo } from "./Logo";
 
 export function Footer() {

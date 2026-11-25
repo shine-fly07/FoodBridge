@@ -27,6 +27,8 @@ import { useToast } from "../components/ui/Toast";
 
 import { AppleShape, BowlShape } from "../components/visuals/FoodShapes";
 import { ScribbleUnderline, DoodleCircle, SparkleStar, DoodleArrow } from "../components/visuals/Doodles";
+import { RevealOnScroll } from "../components/motion/RevealOnScroll";
+import { WordByWordHighlight } from "../components/motion/WordByWordHighlight";
 import { LandingHeroStats } from "./landing/LandingHeroStats";
 import { LandingImpactCalculator } from "./landing/LandingImpactCalculator";
 import { LandingFaqAccordion } from "./landing/LandingFaqAccordion";
@@ -157,13 +159,13 @@ export function LandingView({
         id="home"
         className="relative overflow-hidden pt-8 sm:pt-14 pb-16 bg-[#EEF6F0] border-b border-[#D6E6DC]"
       >
-        {/* Soft Ambient Pastel Glows */}
+        {/* Soft Ambient Pastel Glows with Gentle Pulse */}
         <div
-          className="absolute -top-32 -left-32 w-96 h-96 bg-[#C8E6C9]/40 rounded-full blur-3xl pointer-events-none"
+          className="absolute -top-32 -left-32 w-96 h-96 bg-[#C8E6C9]/40 rounded-full blur-3xl pointer-events-none animate-glow-pulse"
           aria-hidden="true"
         />
         <div
-          className="absolute top-1/2 -right-32 w-96 h-96 bg-[#FFF9C4]/40 rounded-full blur-3xl pointer-events-none"
+          className="absolute top-1/2 -right-32 w-96 h-96 bg-[#FFF9C4]/40 rounded-full blur-3xl pointer-events-none animate-glow-pulse [animation-delay:3s]"
           aria-hidden="true"
         />
 
@@ -171,8 +173,8 @@ export function LandingView({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Column: Headlines & Actions */}
             <div className="lg:col-span-7 space-y-6 relative">
-              {/* Floating 3D Apple Accent */}
-              <div className="absolute -top-10 -left-6 sm:-left-10 animate-bounce duration-[4000ms] pointer-events-none hidden sm:block">
+              {/* Floating 3D Apple Accent with Gentle Smooth Float */}
+              <div className="absolute -top-10 -left-6 sm:-left-10 animate-float-slow pointer-events-none hidden sm:block">
                 <AppleShape variant="glossy-3d" size={80} />
               </div>
 
@@ -206,7 +208,7 @@ export function LandingView({
                   <span className="underline decoration-3 underline-offset-8 decoration-[#2E7D4F]">
                     Donate Surplus Food
                   </span>
-                  <span className="w-9 h-9 rounded-full bg-[#2E7D4F] text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md shadow-[#2E7D4F]/20">
+                  <span className="w-9 h-9 rounded-full bg-[#2E7D4F] text-white flex items-center justify-center group-hover:scale-110 group-hover:translate-x-0.5 transition-all shadow-md shadow-[#2E7D4F]/20">
                     <ArrowRight className="w-4 h-4" />
                   </span>
                 </Link>
@@ -215,7 +217,7 @@ export function LandingView({
                   to="/courier"
                   variant="secondary"
                   size="md"
-                  className="rounded-full bg-white hover:bg-[#F2F8F4] text-[#16281D] border-[#D6E6DC] shadow-xs px-5"
+                  className="rounded-full bg-white hover:bg-[#F2F8F4] text-[#16281D] border-[#D6E6DC] shadow-xs px-5 hover:-translate-y-0.5 transition-transform"
                 >
                   <Truck className="w-4 h-4 mr-1.5 text-[#2E7D4F]" />
                   <span>Join as Volunteer</span>
@@ -231,8 +233,8 @@ export function LandingView({
 
             {/* Right Column: Interactive Sample Walkthrough (Clearly Labelled Demo) */}
             <div className="lg:col-span-5 relative">
-              {/* Floating Warm Bowl Accent */}
-              <div className="absolute -top-8 -right-4 sm:-right-8 animate-pulse duration-[5000ms] pointer-events-none z-10 hidden sm:block">
+              {/* Floating Warm Bowl Accent with Reverse Float */}
+              <div className="absolute -top-8 -right-4 sm:-right-8 animate-float-reverse pointer-events-none z-10 hidden sm:block">
                 <BowlShape variant="glossy-3d" size={88} />
               </div>
 
@@ -304,7 +306,7 @@ export function LandingView({
                   <button
                     type="button"
                     onClick={handleNextSimStep}
-                    className="w-full sm:flex-1 py-2 px-4 rounded-full bg-[#2E7D4F] hover:bg-[#256640] text-white font-bold text-xs transition-all text-center shadow-xs"
+                    className="w-full sm:flex-1 py-2 px-4 rounded-full bg-[#2E7D4F] hover:bg-[#256640] text-white font-bold text-xs transition-all text-center shadow-xs hover:-translate-y-0.5 active:translate-y-0"
                   >
                     {simStep === 4 ? "Restart Walkthrough ↺" : "Next Step ➔"}
                   </button>
@@ -328,7 +330,7 @@ export function LandingView({
           SECTION 2: CHOOSE YOUR PATH (ROLE CARDS)
           ========================================================================= */}
       <section id="roles" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
+        <RevealOnScroll className="text-center max-w-2xl mx-auto space-y-2">
           <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#E8F5E9] border border-[#C8E6C9] shadow-xs">
             Choose Your Path
           </span>
@@ -338,13 +340,13 @@ export function LandingView({
           <p className="text-sm text-[#476352]">
             Whether you manage a food facility, want to volunteer locally, or represent a shelter, FoodBridge makes coordination seamless.
           </p>
-        </div>
+        </RevealOnScroll>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <RevealOnScroll className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Role 1: Food Donor */}
-          <div className="p-7 rounded-[24px] bg-white border border-[#D6E6DC] shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-6">
+          <div className="p-7 rounded-[24px] bg-white border border-[#D6E6DC] shadow-xs hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#E8F5E9] text-[#2E7D4F] border border-[#C8E6C9] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#E8F5E9] text-[#2E7D4F] border border-[#C8E6C9] flex items-center justify-center shadow-xs">
                 <Utensils className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-[#16281D]">
@@ -360,9 +362,9 @@ export function LandingView({
           </div>
 
           {/* Role 2: Volunteer Courier */}
-          <div className="p-7 rounded-[24px] bg-white border border-[#D6E6DC] shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-6">
+          <div className="p-7 rounded-[24px] bg-white border border-[#D6E6DC] shadow-xs hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#FFF8E1] text-[#D97706] border border-[#FFE082] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#FFF8E1] text-[#D97706] border border-[#FFE082] flex items-center justify-center shadow-xs">
                 <Truck className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-[#16281D]">
@@ -378,9 +380,9 @@ export function LandingView({
           </div>
 
           {/* Role 3: Shelter Hub */}
-          <div className="p-7 rounded-[24px] bg-white border border-[#D6E6DC] shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-6">
+          <div className="p-7 rounded-[24px] bg-white border border-[#D6E6DC] shadow-xs hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#F3E5F5] text-[#7B1FA2] border border-[#E1BEE7] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#F3E5F5] text-[#7B1FA2] border border-[#E1BEE7] flex items-center justify-center shadow-xs">
                 <Building2 className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-[#16281D]">
@@ -394,15 +396,15 @@ export function LandingView({
               <span>Access Shelter Hub ➔</span>
             </Button>
           </div>
-        </div>
+        </RevealOnScroll>
       </section>
 
       {/* =========================================================================
-          SECTION 3: HYPERLOCAL NETWORK (Scattered Rotated Pastel Pills)
+          SECTION 3: HYPERLOCAL NETWORK (Scattered Rotated Pastel Pills with Floating Animation)
           ========================================================================= */}
       <section className="bg-[#F6F1E7] py-20 px-4 sm:px-6 lg:px-8 border-y border-[#E2DDD1]">
         <div className="max-w-7xl mx-auto space-y-8">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
+          <RevealOnScroll className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-[#795548] bg-white border border-[#E0D7C7] px-3.5 py-1 rounded-full shadow-xs">
               Hyperlocal Network
             </span>
@@ -412,38 +414,65 @@ export function LandingView({
             <p className="text-sm text-[#476352]">
               An active community coordination system engineered for immediate neighborhood relief.
             </p>
-          </div>
+          </RevealOnScroll>
 
-          {/* Scattered Rotated Pills in Soft Pastel Candies */}
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 max-w-4xl mx-auto py-6">
-            <span className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#E8F5E9] text-[#1B5E20] border border-[#C8E6C9] shadow-xs transform -rotate-6 hover:rotate-0 transition-transform">
+          {/* Scattered Rotated Pills with gentle floating physics */}
+          <RevealOnScroll className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 max-w-4xl mx-auto py-6">
+            <span
+              style={{ animationDelay: "0ms" }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#E8F5E9] text-[#1B5E20] border border-[#C8E6C9] shadow-xs transform -rotate-6 hover:rotate-0 hover:scale-105 transition-all animate-float-subtle cursor-default"
+            >
               Hostel Messes
             </span>
-            <span className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#E0F2F1] text-[#004D40] border border-[#B2DFDB] shadow-xs transform rotate-12 hover:rotate-0 transition-transform">
+            <span
+              style={{ animationDelay: "300ms" }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#E0F2F1] text-[#004D40] border border-[#B2DFDB] shadow-xs transform rotate-12 hover:rotate-0 hover:scale-105 transition-all animate-float-subtle cursor-default"
+            >
               Zero Landfill
             </span>
-            <span className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#F3E5F5] text-[#4A148C] border border-[#E1BEE7] shadow-xs transform -rotate-12 hover:rotate-0 transition-transform">
+            <span
+              style={{ animationDelay: "600ms" }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#F3E5F5] text-[#4A148C] border border-[#E1BEE7] shadow-xs transform -rotate-12 hover:rotate-0 hover:scale-105 transition-all animate-float-subtle cursor-default"
+            >
               Event Catering
             </span>
-            <span className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#FFF9C4] text-[#F57F17] border border-[#FFF59D] shadow-xs transform rotate-6 hover:rotate-0 transition-transform">
+            <span
+              style={{ animationDelay: "900ms" }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#FFF9C4] text-[#F57F17] border border-[#FFF59D] shadow-xs transform rotate-6 hover:rotate-0 hover:scale-105 transition-all animate-float-subtle cursor-default"
+            >
               Safe-Until Timers
             </span>
-            <span className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#FFE0B2] text-[#E65100] border border-[#FFCC80] shadow-xs transform -rotate-3 hover:rotate-0 transition-transform">
+            <span
+              style={{ animationDelay: "1200ms" }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#FFE0B2] text-[#E65100] border border-[#FFCC80] shadow-xs transform -rotate-3 hover:rotate-0 hover:scale-105 transition-all animate-float-subtle cursor-default"
+            >
               Local Pickups
             </span>
-            <span className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#E1F5FE] text-[#01579B] border border-[#B3E5FC] shadow-xs transform rotate-8 hover:rotate-0 transition-transform">
+            <span
+              style={{ animationDelay: "1500ms" }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#E1F5FE] text-[#01579B] border border-[#B3E5FC] shadow-xs transform rotate-8 hover:rotate-0 hover:scale-105 transition-all animate-float-subtle cursor-default"
+            >
               Campus Cafeterias
             </span>
-            <span className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#EFEBE9] text-[#3E2723] border border-[#D7CCC8] shadow-xs transform -rotate-8 hover:rotate-0 transition-transform">
+            <span
+              style={{ animationDelay: "1800ms" }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#EFEBE9] text-[#3E2723] border border-[#D7CCC8] shadow-xs transform -rotate-8 hover:rotate-0 hover:scale-105 transition-all animate-float-subtle cursor-default"
+            >
               Community Kitchens
             </span>
-            <span className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#E8EAF6] text-[#1A237E] border border-[#C5CAE9] shadow-xs transform rotate-14 hover:rotate-0 transition-transform">
+            <span
+              style={{ animationDelay: "2100ms" }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#E8EAF6] text-[#1A237E] border border-[#C5CAE9] shadow-xs transform rotate-14 hover:rotate-0 hover:scale-105 transition-all animate-float-subtle cursor-default"
+            >
               Registered NGOs
             </span>
-            <span className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#FCE4EC] text-[#880E4F] border border-[#F8BBD0] shadow-xs transform -rotate-6 hover:rotate-0 transition-transform">
+            <span
+              style={{ animationDelay: "2400ms" }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#FCE4EC] text-[#880E4F] border border-[#F8BBD0] shadow-xs transform -rotate-6 hover:rotate-0 hover:scale-105 transition-all animate-float-subtle cursor-default"
+            >
               Rapid Redistribution
             </span>
-          </div>
+          </RevealOnScroll>
         </div>
       </section>
 
@@ -451,7 +480,7 @@ export function LandingView({
           SECTION 4: OPERATIONAL WORKFLOW & TIMER LEGEND
           ========================================================================= */}
       <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
+        <RevealOnScroll className="text-center max-w-2xl mx-auto space-y-2">
           <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#E8F5E9] border border-[#C8E6C9] shadow-xs">
             Operational Workflow
           </span>
@@ -461,11 +490,11 @@ export function LandingView({
           <p className="text-sm text-[#476352]">
             A fast, accountable rescue pipeline that prioritizes food freshness and food safety.
           </p>
-        </div>
+        </RevealOnScroll>
 
         {/* 4 Steps Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs space-y-3">
+        <RevealOnScroll className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
             <div className="w-9 h-9 rounded-full bg-[#2E7D4F] text-white font-bold flex items-center justify-center text-sm shadow-xs">
               1
             </div>
@@ -477,7 +506,7 @@ export function LandingView({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs space-y-3">
+          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
             <div className="w-9 h-9 rounded-full bg-[#D97706] text-white font-bold flex items-center justify-center text-sm shadow-xs">
               2
             </div>
@@ -489,7 +518,7 @@ export function LandingView({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs space-y-3">
+          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
             <div className="w-9 h-9 rounded-full bg-[#7B1FA2] text-white font-bold flex items-center justify-center text-sm shadow-xs">
               3
             </div>
@@ -501,7 +530,7 @@ export function LandingView({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs space-y-3">
+          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
             <div className="w-9 h-9 rounded-full bg-[#1B5E20] text-white font-bold flex items-center justify-center text-sm shadow-xs">
               4
             </div>
@@ -512,10 +541,10 @@ export function LandingView({
               The receiving shelter confirms meal arrival; saved food and greenhouse gas offsets are logged to the public impact ledger.
             </p>
           </div>
-        </div>
+        </RevealOnScroll>
 
         {/* Safety Countdown Legend */}
-        <div className="p-5 rounded-2xl bg-white border border-[#D6E6DC] shadow-xs space-y-3">
+        <RevealOnScroll className="p-5 rounded-2xl bg-white border border-[#D6E6DC] shadow-xs space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold text-[#16281D] uppercase tracking-wider">
             <Clock className="w-4 h-4 text-[#2E7D4F]" />
             <span>Shelf-Life &amp; Safety Timer Legend:</span>
@@ -537,7 +566,7 @@ export function LandingView({
           <p className="text-[11px] text-[#5B7363] pt-1 border-t border-[#E8F2EC]">
             ✓ Verified Auto-Expiry: Listings that pass their donor-specified safe-until window without being claimed are automatically hidden from the active board.
           </p>
-        </div>
+        </RevealOnScroll>
       </section>
 
       {/* =========================================================================
@@ -545,7 +574,7 @@ export function LandingView({
           ========================================================================= */}
       <section id="live-surplus" className="py-14 bg-white border-y border-[#D6E6DC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <RevealOnScroll className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#FFF8E1] text-[#D97706] border border-[#FFE082] uppercase tracking-wider inline-flex items-center gap-1.5 shadow-xs">
                 <Sparkles className="w-3.5 h-3.5 text-[#D97706]" />
@@ -562,7 +591,7 @@ export function LandingView({
             <Button to="/courier" variant="secondary" size="sm" className="rounded-full">
               <span>View Full Courier Board ➔</span>
             </Button>
-          </div>
+          </RevealOnScroll>
 
           {teaserListings.length === 0 ? (
             <EmptyState
@@ -570,13 +599,13 @@ export function LandingView({
               message="Dining facilities and caterers typically post batches after meal preparation or dining service. Check back soon or visit the volunteer courier board!"
             />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <RevealOnScroll className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {teaserListings.map((listing) => {
                 const expiresAt = listing.expires_at || listing.safe_until;
                 return (
                   <div
                     key={listing.id}
-                    className="p-6 rounded-2xl flex flex-col justify-between border border-[#D6E6DC] bg-[#FBF8F1] shadow-xs hover:shadow-md transition-all space-y-4"
+                    className="p-6 rounded-2xl flex flex-col justify-between border border-[#D6E6DC] bg-[#FBF8F1] shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all space-y-4"
                   >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
@@ -619,16 +648,16 @@ export function LandingView({
                   </div>
                 );
               })}
-            </div>
+            </RevealOnScroll>
           )}
         </div>
       </section>
 
       {/* =========================================================================
-          SECTION 6: WHY IT MATTERS & CALCULATOR
+          SECTION 6: WHY IT MATTERS & CALCULATOR (With Word-by-Word Editorial Highlight)
           ========================================================================= */}
       <section id="problem" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
+        <RevealOnScroll className="text-center max-w-2xl mx-auto space-y-2">
           <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#E8F5E9] border border-[#C8E6C9] shadow-xs">
             Why It Matters
           </span>
@@ -638,12 +667,23 @@ export function LandingView({
           <p className="text-sm text-[#476352]">
             A small shift in logistics prevents edible food from generating landfill methane while feeding local families.
           </p>
-        </div>
+        </RevealOnScroll>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Word-by-Word Scroll Highlight Manifesto */}
+        <RevealOnScroll className="max-w-3xl mx-auto p-6 rounded-2xl bg-[#EEF6F0] border border-[#D6E6DC] text-center shadow-xs">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#2E7D4F] block mb-2">
+            The FoodBridge Mission
+          </span>
+          <WordByWordHighlight
+            text="A small shift in logistics prevents edible surplus from generating landfill methane while feeding local families. Together, dining kitchens, student volunteer couriers, and neighborhood shelters turn daily surplus into immediate community relief."
+            className="text-base sm:text-lg"
+          />
+        </RevealOnScroll>
+
+        <RevealOnScroll className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left: 3 Factual Pillars */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="p-5 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs space-y-2">
+            <div className="p-5 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs hover:shadow-md transition-all space-y-2">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-[#FBE9E7] text-[#E8643C]">
                   <AlertTriangle className="w-4 h-4" />
@@ -657,7 +697,7 @@ export function LandingView({
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs space-y-2">
+            <div className="p-5 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs hover:shadow-md transition-all space-y-2">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-[#E8F5E9] text-[#2E7D4F]">
                   <Compass className="w-4 h-4" />
@@ -671,7 +711,7 @@ export function LandingView({
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs space-y-2">
+            <div className="p-5 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs hover:shadow-md transition-all space-y-2">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-[#E8F5E9] text-[#1B5E20]">
                   <Leaf className="w-4 h-4" />
@@ -690,14 +730,14 @@ export function LandingView({
           <div id="impact" className="lg:col-span-7">
             <LandingImpactCalculator />
           </div>
-        </div>
+        </RevealOnScroll>
       </section>
 
       {/* =========================================================================
           SECTION 7: TRUST & TRANSPARENCY
           ========================================================================= */}
       <section id="trust" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
+        <RevealOnScroll className="text-center max-w-2xl mx-auto space-y-2">
           <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#E8F5E9] border border-[#C8E6C9] shadow-xs">
             Trust &amp; Transparency
           </span>
@@ -707,10 +747,10 @@ export function LandingView({
           <p className="text-sm text-[#476352]">
             FoodBridge combines donor timestamps, role verification, and public audit summaries to maintain safety.
           </p>
-        </div>
+        </RevealOnScroll>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs space-y-3">
+        <RevealOnScroll className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
             <div className="w-10 h-10 rounded-xl bg-[#E8F5E9] text-[#2E7D4F] flex items-center justify-center">
               <Clock className="w-5 h-5" />
             </div>
@@ -722,7 +762,7 @@ export function LandingView({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs space-y-3">
+          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
             <div className="w-10 h-10 rounded-xl bg-[#FBE9E7] text-[#E8643C] flex items-center justify-center">
               <Building2 className="w-5 h-5" />
             </div>
@@ -734,7 +774,7 @@ export function LandingView({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs space-y-3">
+          <div className="p-6 rounded-2xl border border-[#D6E6DC] bg-white shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
             <div className="w-10 h-10 rounded-xl bg-[#F3E5F5] text-[#7B1FA2] flex items-center justify-center">
               <CheckCircle2 className="w-5 h-5" />
             </div>
@@ -748,14 +788,14 @@ export function LandingView({
               <span>View Quantified Impact Page ➔</span>
             </Link>
           </div>
-        </div>
+        </RevealOnScroll>
       </section>
 
       {/* =========================================================================
           SECTION 8: FIVE FOUNDATIONAL PROJECT AIMS (Zero SDG text)
           ========================================================================= */}
       <section id="about" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="p-8 rounded-[28px] bg-[#F6F1E7] border border-[#E2DDD1] space-y-6">
+        <RevealOnScroll className="p-8 rounded-[28px] bg-[#F6F1E7] border border-[#E2DDD1] space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2DDD1] pb-4">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">
@@ -772,7 +812,7 @@ export function LandingView({
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2">
-            <div className="p-4 rounded-xl bg-white border border-[#E2DDD1] space-y-1.5 shadow-xs">
+            <div className="p-4 rounded-xl bg-white border border-[#E2DDD1] space-y-1.5 shadow-xs hover:shadow-sm hover:-translate-y-0.5 transition-all">
               <div className="text-sm font-bold text-[#2E7D4F] font-mono">01</div>
               <h3 className="text-sm font-bold text-[#16281D]">Rapid Surplus Notification</h3>
               <p className="text-[11px] text-[#476352] leading-relaxed">
@@ -780,7 +820,7 @@ export function LandingView({
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border border-[#E2DDD1] space-y-1.5 shadow-xs">
+            <div className="p-4 rounded-xl bg-white border border-[#E2DDD1] space-y-1.5 shadow-xs hover:shadow-sm hover:-translate-y-0.5 transition-all">
               <div className="text-sm font-bold text-[#2E7D4F] font-mono">02</div>
               <h3 className="text-sm font-bold text-[#16281D]">Direct Volunteer Dispatch</h3>
               <p className="text-[11px] text-[#476352] leading-relaxed">
@@ -788,7 +828,7 @@ export function LandingView({
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border border-[#E2DDD1] space-y-1.5 shadow-xs">
+            <div className="p-4 rounded-xl bg-white border border-[#E2DDD1] space-y-1.5 shadow-xs hover:shadow-sm hover:-translate-y-0.5 transition-all">
               <div className="text-sm font-bold text-[#2E7D4F] font-mono">03</div>
               <h3 className="text-sm font-bold text-[#16281D]">Shelf-Life Prioritization</h3>
               <p className="text-[11px] text-[#476352] leading-relaxed">
@@ -796,7 +836,7 @@ export function LandingView({
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border border-[#E2DDD1] space-y-1.5 shadow-xs">
+            <div className="p-4 rounded-xl bg-white border border-[#E2DDD1] space-y-1.5 shadow-xs hover:shadow-sm hover:-translate-y-0.5 transition-all">
               <div className="text-sm font-bold text-[#2E7D4F] font-mono">04</div>
               <h3 className="text-sm font-bold text-[#16281D]">Transparent Accounting</h3>
               <p className="text-[11px] text-[#476352] leading-relaxed">
@@ -804,7 +844,7 @@ export function LandingView({
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border border-[#E2DDD1] space-y-1.5 shadow-xs">
+            <div className="p-4 rounded-xl bg-white border border-[#E2DDD1] space-y-1.5 shadow-xs hover:shadow-sm hover:-translate-y-0.5 transition-all">
               <div className="text-sm font-bold text-[#2E7D4F] font-mono">05</div>
               <h3 className="text-sm font-bold text-[#16281D]">Community Recognition</h3>
               <p className="text-[11px] text-[#476352] leading-relaxed">
@@ -812,14 +852,14 @@ export function LandingView({
               </p>
             </div>
           </div>
-        </div>
+        </RevealOnScroll>
       </section>
 
       {/* =========================================================================
           SECTION 9: FAQ ACCORDION
           ========================================================================= */}
       <section id="faq" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
+        <RevealOnScroll className="text-center max-w-2xl mx-auto space-y-2">
           <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#E8F5E9] border border-[#C8E6C9] shadow-xs">
             Common Questions
           </span>
@@ -829,7 +869,7 @@ export function LandingView({
           <p className="text-sm text-[#476352]">
             Everything you need to know about food safety, volunteering, and receiving food.
           </p>
-        </div>
+        </RevealOnScroll>
 
         <LandingFaqAccordion />
       </section>
@@ -838,7 +878,7 @@ export function LandingView({
           SECTION 10: FINAL CONVERSION BANNER
           ========================================================================= */}
       <section id="get-involved" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-[32px] bg-[#2E7D4F] text-white p-8 sm:p-14 text-center shadow-lg shadow-[#2E7D4F]/15 space-y-6">
+        <RevealOnScroll className="rounded-[32px] bg-[#2E7D4F] text-white p-8 sm:p-14 text-center shadow-lg shadow-[#2E7D4F]/15 space-y-6">
           <div className="max-w-2xl mx-auto space-y-3">
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
               Ready to Bridge the Food Waste Gap?
@@ -853,7 +893,7 @@ export function LandingView({
               to="/donate"
               variant="mango"
               size="lg"
-              className="bg-white text-[#16281D] hover:bg-emerald-50 border-transparent font-bold rounded-full px-6 shadow-sm"
+              className="bg-white text-[#16281D] hover:bg-emerald-50 border-transparent font-bold rounded-full px-6 shadow-sm hover:scale-105 transition-transform"
             >
               <span>Post Surplus Food ➔</span>
             </Button>
@@ -861,14 +901,14 @@ export function LandingView({
             <Button
               variant="secondary"
               size="lg"
-              className="bg-[#1E5434] text-white hover:bg-[#163E26] border-emerald-600/50 font-bold rounded-full px-6"
+              className="bg-[#1E5434] text-white hover:bg-[#163E26] border-emerald-600/50 font-bold rounded-full px-6 hover:scale-105 transition-transform"
               onClick={() => openAuthModal({ role: "volunteer", tab: "quick" })}
             >
               <Truck className="w-4 h-4 mr-1.5" />
               <span>Join as Volunteer</span>
             </Button>
           </div>
-        </div>
+        </RevealOnScroll>
       </section>
     </div>
   );

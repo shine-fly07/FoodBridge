@@ -3,8 +3,6 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
   X,
-  Award,
-  ShieldAlert,
   User,
   LogOut,
   Gamepad2,
