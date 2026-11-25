@@ -9,8 +9,8 @@ Restaurants, college canteens, hostels, and catered events often have safe, edib
 ## Unified Rescue Pipeline
 
 ```
-Donor Posts Surplus (e.g. 50 meals) ➔ Volunteer Courier Claims ➔ Courier Collects at Dock ➔ Shelter Hub Distributes
-[ Available ]                    ➔ [ Claimed ]             ➔ [ Collected ]             ➔ [ Distributed ]
+Donor Posts Surplus ➔ NGO Accepts & Sets Drop-off ➔ Volunteer Claims ➔ Courier Collects ➔ Volunteer Confirms Delivery
+[ Available ]       ➔ [ Accepted ]                ➔ [ Claimed ]       ➔ [ Collected ]  ➔ [ Delivered ]
 ```
 
 * **Live Expiry Countdown**:
@@ -30,8 +30,8 @@ Donor Posts Surplus (e.g. 50 meals) ➔ Volunteer Courier Claims ➔ Courier Col
 |------|-------|-------------|
 | **Landing** | `/` | Mission, problem statement, live workflow simulator, four action pathways, and impact preview |
 | **Donor / Canteen** | `/donate` | Post surplus food listings with portions, pickup dock address, and safe expiry window |
-| **Volunteer Courier** | `/courier` | View urgent campus listings, claim pickups, and mark food collected |
-| **NGO Shelter Hub** | `/ngo` | View incoming deliveries, confirm receipt, and log distributed portions |
+| **Volunteer Courier** | `/courier` | View NGO-accepted orders with pickup and drop-off addresses, claim pickups, and report food drop-off |
+| **NGO Shelter Hub** | `/ngo` | Accept donor listings, provide a drop-off address, track pickups, and confirm food receipt |
 | **Unified Portal** | `/portal`, `/portal/:role` | Multi-role command center with search, status filters, and live stats |
 | **Impact & Audits** | `/impact` | Monthly progress trajectory, carbon calculations, and verified physical audit ledger |
 | **Side Game** | `/game` | Launch 2D Food Rescue Runner (Phaser mini-game on port 5173) |

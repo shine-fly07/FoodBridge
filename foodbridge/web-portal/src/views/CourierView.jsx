@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Truck, MapPin, CheckCircle2, Clock, PackageCheck, AlertTriangle } from "lucide-react";
+import { Truck } from "lucide-react";
 import { ListingCard } from "../components/ListingCard";
 import { EmptyState } from "../components/ui/EmptyState";
 import { Button } from "../components/ui/Button";
@@ -13,17 +13,25 @@ export function CourierView({ listings, onAction }) {
 
   const isVolunteer = activeRole === "volunteer";
 
-  const availableListings = listings.filter((l) => l.status === "available");
-  const myPickups = listings.filter((l) => l.status === "claimed");
-  const inTransit = listings.filter((l) => l.status === "collected");
-  const completed = listings.filter((l) => l.status === "distributed");
+  const availableListings = listings.filter((l) => {
+    const expiresAt = l.expiresAt || l.expires_at || l.safe_until;
+    return l.status === "accepted" && (!expiresAt || new Date(expiresAt).getTime() > Date.now());
+  });
+  const isMine = (listing) => Number(listing.volunteer?.id ?? listing.volunteer_id) === Number(currentUser?.id);
+  const myPickups = listings.filter((l) => l.status === "claimed" && isMine(l));
+  const inTransit = listings.filter((l) => ["collected", "delivered"].includes(l.status) && isMine(l));
+  const awaitingNgoConfirmation = inTransit.filter((l) => l.status === "delivered").length;
+  const completed = listings.filter((l) => l.status === "distributed" && isMine(l));
+  const courierVisibleListings = listings.filter((l) =>
+    ["accepted", "claimed", "collected", "delivered", "distributed"].includes(l.status)
+  );
 
   const displayedListings =
     filter === "available"
       ? availableListings
       : filter === "my_pickups"
       ? [...myPickups, ...inTransit]
-      : listings;
+      : courierVisibleListings;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -79,12 +87,12 @@ export function CourierView({ listings, onAction }) {
 
         <Card className="p-4 bg-[var(--color-bg-surface)] border-[var(--color-border)]">
           <div className="text-xs font-bold font-['Quicksand'] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
-            Collected / In Transit
+            In Transit / NGO Confirmation
           </div>
           <div className="font-['Fraunces'] text-2xl sm:text-3xl font-bold text-purple-700">
             {inTransit.length}
           </div>
-          <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">En route to shelter</div>
+          <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">{awaitingNgoConfirmation} awaiting NGO receipt</div>
         </Card>
 
         <Card className="p-4 bg-[var(--color-bg-surface)] border-[var(--color-border)]">
@@ -129,7 +137,7 @@ export function CourierView({ listings, onAction }) {
                 : "text-[var(--color-text-muted)] hover:text-[var(--color-forest-text)]"
             }`}
           >
-            <span>All Batches ({listings.length})</span>
+            <span>All Batches ({courierVisibleListings.length})</span>
           </button>
         </div>
       </div>
@@ -141,7 +149,7 @@ export function CourierView({ listings, onAction }) {
           title="No deliveries match this view"
           message={
             filter === "available"
-              ? "All current campus food surplus batches have been claimed by couriers. Check back when dining halls finish dinner service!"
+              ? "Donations appear here after an NGO accepts them and provides a drop-off address. Check back for newly accepted deliveries."
               : "You have no claimed pickups awaiting collection right now. Check the 'Available for Pickup' tab to claim one!"
           }
         />
@@ -151,7 +159,7 @@ export function CourierView({ listings, onAction }) {
             <ListingCard
               key={item.id}
               listing={item}
-              activeRole="volunteer"
+              activeRole={activeRole}
               currentUser={currentUser}
               onAction={onAction}
             />

@@ -8,18 +8,25 @@ import { validateEnvironment } from "./config/env.js";
 import { pool, checkDbConnection } from "./config/db.js";
 import { AppError, globalErrorHandler } from "./middleware/errors.js";
 import { authenticate, requireRole } from "./middleware/auth.js";
+import { validateBody } from "./middleware/validation.js";
 import {
   signupUser,
   loginUser,
   getMe,
   getPartners,
+  signupSchema,
+  loginSchema,
 } from "./controllers/userController.js";
 import {
   listListings,
   createListing,
+  createListingSchema,
+  acceptListing,
+  acceptListingSchema,
   claimListing,
   collectListing,
-  distributeListing,
+  deliverListing,
+  confirmDeliveryListing,
   cancelListing,
   monthlyImpact,
   pipelineSummary,
@@ -94,19 +101,21 @@ app.get("/api/health", (_req, res) => {
 
 // --- Auth & Users ---
 // Requirement 12: remove/restrict GET /api/users (no raw user dumps)
-app.post("/api/users/signup", authLimiter, signupUser);
-app.post("/api/users", authLimiter, signupUser); // backwards compatibility
-app.post("/api/users/login", authLimiter, loginUser);
+app.post("/api/users/signup", authLimiter, validateBody(signupSchema), signupUser);
+app.post("/api/users", authLimiter, validateBody(signupSchema), signupUser); // backwards compatibility
+app.post("/api/users/login", authLimiter, validateBody(loginSchema), loginUser);
 app.get("/api/users/me", authenticate, getMe);
 app.get("/api/users/partners", getPartners);
 app.get("/api/users", getPartners); // backwards-compatible safe partner summary
 
 // --- Core Surplus Food Pipeline ---
 app.get("/api/listings", listListings);
-app.post("/api/listings", authenticate, requireRole("donor"), createListing);
+app.post("/api/listings", authenticate, requireRole("donor"), validateBody(createListingSchema), createListing);
+app.post("/api/listings/:id/accept", authenticate, requireRole("ngo"), validateBody(acceptListingSchema), acceptListing);
 app.post("/api/listings/:id/claim", authenticate, requireRole("volunteer"), claimListing);
 app.post("/api/listings/:id/collect", authenticate, requireRole("volunteer"), collectListing);
-app.post("/api/listings/:id/distribute", authenticate, requireRole("ngo"), distributeListing);
+app.post("/api/listings/:id/deliver", authenticate, requireRole("volunteer"), deliverListing);
+app.post("/api/listings/:id/confirm-delivery", authenticate, requireRole("ngo"), confirmDeliveryListing);
 app.post("/api/listings/:id/cancel", authenticate, requireRole("donor"), cancelListing);
 
 // --- Impact Metrics ---

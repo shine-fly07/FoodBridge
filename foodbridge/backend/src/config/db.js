@@ -210,13 +210,14 @@ function handleMemoryQuery(text, params = []) {
   // Listings pipeline & summary queries
   if (sql.includes("FROM listings") && (sql.includes("meals_diverted") || sql.includes("SUM(l.meals)") || sql.includes("COUNT(*) FILTER"))) {
     const available = memoryStore.listings.filter(
-      (l) => l.status === "available" && (!l.expires_at || new Date(l.expires_at).getTime() > now)
+      (l) => l.status === "accepted" && (!l.expires_at || new Date(l.expires_at).getTime() > now)
     ).length;
     const claimed = memoryStore.listings.filter((l) => l.status === "claimed").length;
     const collected = memoryStore.listings.filter((l) => l.status === "collected").length;
+    const delivered = memoryStore.listings.filter((l) => l.status === "delivered").length;
     const distributed = memoryStore.listings.filter((l) => l.status === "distributed").length;
     const mealsDiverted = memoryStore.listings
-      .filter((l) => l.status === "collected" || l.status === "distributed")
+      .filter((l) => ["collected", "delivered", "distributed"].includes(l.status))
       .reduce((acc, l) => acc + (Number(l.meals) || 0), 0);
 
     return {
@@ -225,8 +226,9 @@ function handleMemoryQuery(text, params = []) {
           available,
           claimed,
           collected,
+          delivered,
           distributed,
-          active_listings: available + claimed,
+          active_listings: available + claimed + collected + delivered,
           meals_diverted: mealsDiverted,
           total_meals: mealsDiverted,
           meals: mealsDiverted,
@@ -264,6 +266,7 @@ function handleMemoryQuery(text, params = []) {
       pickup_address: params[3],
       notes: params[4] || null,
       expires_at: new Date(now + mins * 60000).toISOString(),
+      dropoff_address: null,
       status: "available",
       volunteer_id: null,
       volunteer_name: null,
@@ -282,8 +285,20 @@ function handleMemoryQuery(text, params = []) {
     const item = memoryStore.listings.find((l) => l.id === id);
     if (!item) return { rows: [], rowCount: 0 };
 
-    if (sql.includes("SET status = 'claimed'") || sql.includes("SET status='claimed'")) {
+    if (sql.includes("SET status = 'accepted'") || sql.includes("SET status='accepted'")) {
       if (item.status !== "available" || (item.expires_at && new Date(item.expires_at).getTime() <= now)) {
+        return { rows: [], rowCount: 0 };
+      }
+      item.status = "accepted";
+      item.ngo_id = Number(params[1]);
+      item.dropoff_address = params[2];
+      const ngo = memoryStore.users.find((u) => u.id === item.ngo_id);
+      if (ngo) item.ngo_org = ngo.org || ngo.name;
+      return { rows: [item], rowCount: 1 };
+    }
+
+    if (sql.includes("SET status = 'claimed'") || sql.includes("SET status='claimed'")) {
+      if (item.status !== "accepted" || (item.expires_at && new Date(item.expires_at).getTime() <= now)) {
         return { rows: [], rowCount: 0 };
       }
       item.status = "claimed";
@@ -303,14 +318,20 @@ function handleMemoryQuery(text, params = []) {
       return { rows: [item], rowCount: 1 };
     }
 
+    if (sql.includes("SET status = 'delivered'") || sql.includes("SET status='delivered'")) {
+      if (item.status !== "collected" || item.volunteer_id !== Number(params[1])) {
+        return { rows: [], rowCount: 0 };
+      }
+      item.status = "delivered";
+      item.delivered_at = new Date().toISOString();
+      return { rows: [item], rowCount: 1 };
+    }
+
     if (sql.includes("SET status = 'distributed'") || sql.includes("SET status='distributed'")) {
-      if (item.status !== "collected") {
+      if (item.status !== "delivered" || item.ngo_id !== Number(params[1])) {
         return { rows: [], rowCount: 0 };
       }
       item.status = "distributed";
-      item.ngo_id = Number(params[1]);
-      const ngo = memoryStore.users.find((u) => u.id === item.ngo_id);
-      if (ngo) item.ngo_org = ngo.org || ngo.name;
       item.distributed_at = new Date().toISOString();
       return { rows: [item], rowCount: 1 };
     }
@@ -325,7 +346,7 @@ function handleMemoryQuery(text, params = []) {
 
     if (sql.includes("status = 'expired'")) {
       const expiredItems = memoryStore.listings.filter(
-        (l) => (l.status === "available" || l.status === "claimed") && l.expires_at && new Date(l.expires_at).getTime() <= now
+        (l) => (l.status === "available" || l.status === "accepted" || l.status === "claimed") && l.expires_at && new Date(l.expires_at).getTime() <= now
       );
       expiredItems.forEach((l) => {
         l.status = "expired";

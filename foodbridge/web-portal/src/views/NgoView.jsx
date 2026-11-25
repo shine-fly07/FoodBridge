@@ -1,27 +1,38 @@
 import React, { useState } from "react";
-import { Building2, CheckCircle2, PackageCheck, Utensils, HeartHandshake, ShieldCheck } from "lucide-react";
+import { Building2, CheckCircle2, PackageCheck, Utensils, ShieldCheck } from "lucide-react";
 import { ListingCard } from "../components/ListingCard";
 import { EmptyState } from "../components/ui/EmptyState";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
-import { Badge } from "../components/ui/Badge";
 import { useAuth } from "../context/AuthContext";
 
 export function NgoView({ listings, onAction }) {
   const { currentUser, activeRole, setActiveRole } = useAuth();
-  const [tab, setTab] = useState("incoming"); // "incoming" | "distributed"
+  const [tab, setTab] = useState("available");
 
   const isNgo = activeRole === "ngo";
+  const isMine = (listing) => Number(listing.ngo?.id ?? listing.ngo_id) === Number(currentUser?.id);
+  const availableListings = listings.filter((listing) => listing.status === "available");
+  const activeOrders = listings.filter((listing) =>
+    isMine(listing) && ["accepted", "claimed", "collected", "delivered"].includes(listing.status)
+  );
+  const deliveredOrders = listings.filter((listing) => isMine(listing) && listing.status === "distributed");
+  const pendingConfirmations = activeOrders.filter((listing) => listing.status === "delivered").length;
+  const totalDeliveredMeals = deliveredOrders.reduce((sum, listing) => sum + (Number(listing.meals) || 0), 0);
 
-  const incomingBatches = listings.filter((l) => l.status === "collected");
-  const enRouteBatches = listings.filter((l) => l.status === "claimed");
-  const distributedBatches = listings.filter((l) => l.status === "distributed");
-
-  const totalDistributedMeals = distributedBatches.reduce((sum, l) => sum + (Number(l.meals) || 0), 0);
+  const tabs = [
+    { id: "available", label: `Available Donations (${availableListings.length})` },
+    { id: "active", label: `My Active Orders (${activeOrders.length})` },
+    { id: "delivered", label: `Delivered History (${deliveredOrders.length})` },
+  ];
+  const visibleListings = tab === "available"
+    ? availableListings
+    : tab === "active"
+      ? activeOrders
+      : deliveredOrders;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--color-border)]">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -30,10 +41,10 @@ export function NgoView({ listings, onAction }) {
             </span>
           </div>
           <h1 className="font-['Fraunces'] text-2xl sm:text-3xl font-extrabold text-[var(--color-forest-text)]">
-            Food Distribution &amp; Receipt Ledger
+            Accept Food Donations
           </h1>
           <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
-            Confirm received surplus deliveries from volunteer couriers and log served meals to community shelters.
+            Set the drop-off address when accepting a donation. After a volunteer reports delivery, verify the food at that location and confirm receipt in My Active Orders.
           </p>
         </div>
 
@@ -49,113 +60,86 @@ export function NgoView({ listings, onAction }) {
         )}
       </div>
 
-      {/* Shelter Metrics Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-4 bg-[var(--color-bg-surface)] border-[var(--color-border)]">
           <div className="flex items-center justify-between text-xs font-bold font-['Quicksand'] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
-            <span>Incoming for Delivery</span>
+            <span>Available to Accept</span>
             <PackageCheck className="w-4 h-4 text-purple-600" />
           </div>
-          <div className="font-['Fraunces'] text-3xl font-bold text-purple-700">
-            {incomingBatches.length}
-          </div>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            Couriers currently en route to your kitchen dock
-          </p>
+          <div className="font-['Fraunces'] text-3xl font-bold text-purple-700">{availableListings.length}</div>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">Donations awaiting an NGO</p>
         </Card>
 
         <Card className="p-4 bg-[var(--color-bg-surface)] border-[var(--color-border)]">
           <div className="flex items-center justify-between text-xs font-bold font-['Quicksand'] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
-            <span>Total Meals Distributed</span>
+            <span>Needs Receipt Confirmation</span>
+            <Building2 className="w-4 h-4 text-purple-600" />
+          </div>
+          <div className="font-['Fraunces'] text-3xl font-bold text-purple-700">{pendingConfirmations}</div>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">Volunteer-reported drop-offs awaiting your confirmation</p>
+        </Card>
+
+        <Card className="p-4 bg-[var(--color-bg-surface)] border-[var(--color-border)]">
+          <div className="flex items-center justify-between text-xs font-bold font-['Quicksand'] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
+            <span>Meals Delivered</span>
             <Utensils className="w-4 h-4 text-[var(--color-leaf-green)]" />
           </div>
           <div className="font-['Fraunces'] text-3xl font-bold text-[var(--color-leaf-green)]">
-            {totalDistributedMeals.toLocaleString()}
+            {totalDeliveredMeals.toLocaleString()}
           </div>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            Verified portions served to community members
-          </p>
-        </Card>
-
-        <Card className="p-4 bg-[var(--color-bg-surface)] border-[var(--color-border)]">
-          <div className="flex items-center justify-between text-xs font-bold font-['Quicksand'] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
-            <span>SDG 2 Compliance</span>
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div className="font-['Fraunces'] text-3xl font-bold text-emerald-800">
-            100%
-          </div>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            Zero-hunger verified distribution trail
+          <p className="text-xs text-[var(--color-text-muted)] mt-1 flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            Confirmed as received by your NGO
           </p>
         </Card>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="inline-flex p-1 rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-xs font-bold font-['Quicksand']">
-        <button
-          onClick={() => setTab("incoming")}
-          className={`px-4 py-2 rounded-[var(--radius-sm)] transition-all flex items-center gap-1.5 ${
-            tab === "incoming"
-              ? "bg-[var(--color-leaf-green)] text-white shadow-xs"
-              : "text-[var(--color-text-muted)] hover:text-[var(--color-forest-text)]"
-          }`}
-        >
-          <span>Awaiting Receipt / Incoming ({incomingBatches.length})</span>
-        </button>
-        <button
-          onClick={() => setTab("distributed")}
-          className={`px-4 py-2 rounded-[var(--radius-sm)] transition-all flex items-center gap-1.5 ${
-            tab === "distributed"
-              ? "bg-[var(--color-leaf-green)] text-white shadow-xs"
-              : "text-[var(--color-text-muted)] hover:text-[var(--color-forest-text)]"
-          }`}
-        >
-          <span>Verified Distribution History ({distributedBatches.length})</span>
-        </button>
+      <div className="inline-flex flex-wrap p-1 rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-xs font-bold font-['Quicksand']">
+        {tabs.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setTab(item.id)}
+            className={`px-4 py-2 rounded-[var(--radius-sm)] transition-all ${
+              tab === item.id
+                ? "bg-[var(--color-leaf-green)] text-white shadow-xs"
+                : "text-[var(--color-text-muted)] hover:text-[var(--color-forest-text)]"
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
       </div>
 
-      {/* Tab Content */}
-      {tab === "incoming" ? (
-        incomingBatches.length === 0 ? (
-          <EmptyState
-            icon={Building2}
-            title="No incoming food batches awaiting confirmation"
-            message="Couriers will appear here the moment they pick up food from the campus canteen and are en route to your kitchen."
-          />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {incomingBatches.map((item) => (
-              <ListingCard
-                key={item.id}
-                listing={item}
-                activeRole="ngo"
-                currentUser={currentUser}
-                onAction={onAction}
-              />
-            ))}
-          </div>
-        )
+      {visibleListings.length === 0 ? (
+        <EmptyState
+          icon={tab === "delivered" ? CheckCircle2 : Building2}
+          title={
+            tab === "available"
+              ? "No donations waiting for acceptance"
+              : tab === "active"
+                ? "No active orders in progress"
+                : "No deliveries completed yet"
+          }
+          message={
+            tab === "available"
+              ? "New donor listings will appear here. Accept one and provide your drop-off address to dispatch a volunteer."
+              : tab === "active"
+                ? "Donations you accept will be tracked here through pickup, volunteer-reported delivery, and your receipt confirmation."
+                : "Deliveries you confirm as received will appear here."
+          }
+        />
       ) : (
-        distributedBatches.length === 0 ? (
-          <EmptyState
-            icon={CheckCircle2}
-            title="No completed distributions yet"
-            message="When you confirm received food batches, they will be archived here in your permanent verified audit record."
-          />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {distributedBatches.map((item) => (
-              <ListingCard
-                key={item.id}
-                listing={item}
-                activeRole="ngo"
-                currentUser={currentUser}
-                onAction={onAction}
-              />
-            ))}
-          </div>
-        )
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {visibleListings.map((item) => (
+            <ListingCard
+              key={item.id}
+              listing={item}
+              activeRole={activeRole}
+              currentUser={currentUser}
+              onAction={onAction}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

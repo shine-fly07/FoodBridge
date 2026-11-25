@@ -19,8 +19,13 @@ UPDATE users
 SET password_hash = '$2a$10$e8k8h3y11Z260O40N9f2quYhB7k1B3H6V8I5z3N2o4B7m9v1w2y3z'
 WHERE password_hash IS NULL;
 
+UPDATE users
+SET updated_at = now()
+WHERE updated_at IS NULL;
+
 ALTER TABLE users ALTER COLUMN email SET NOT NULL;
 ALTER TABLE users ALTER COLUMN password_hash SET NOT NULL;
+ALTER TABLE users ALTER COLUMN updated_at SET NOT NULL;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_unique ON users (email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users (role);
@@ -44,7 +49,7 @@ ALTER TABLE listings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now
 -- Expand status check constraint to include 'expired' and 'cancelled'
 ALTER TABLE listings DROP CONSTRAINT IF EXISTS listings_status_check;
 ALTER TABLE listings ADD CONSTRAINT listings_status_check
-CHECK (status IN ('available', 'claimed', 'collected', 'distributed', 'expired', 'cancelled'));
+CHECK (status IN ('available', 'claimed', 'collected', 'distributed', 'cancelled', 'expired'));
 
 -- Ensure expiry is in the future relative to creation
 ALTER TABLE listings DROP CONSTRAINT IF EXISTS chk_expiry_future;
