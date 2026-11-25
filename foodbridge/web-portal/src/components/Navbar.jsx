@@ -3,8 +3,6 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
   X,
-  Award,
-  ShieldAlert,
   User,
   LogOut,
   Gamepad2,
@@ -53,9 +51,16 @@ export function Navbar({
   const gameUrl = import.meta.env.VITE_GAME_URL || "http://localhost:5173";
 
   return (
-    <header className="sticky top-0 z-40 bg-[var(--color-bg-surface)]/95 backdrop-blur-md border-b border-[var(--color-border)] shadow-[var(--shadow-warm-sm)] transition-all">
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#16281D] focus:text-white focus:rounded-lg focus:shadow-xl focus:font-bold focus:outline-none"
+      >
+        Skip to main content
+      </a>
+      <header className="sticky top-0 z-40 bg-[var(--color-bg-surface)]/95 backdrop-blur-md border-b border-[var(--color-border)] shadow-[var(--shadow-warm-sm)] transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-3">
-        {/* Left: Logo & SDG Badges */}
+        {/* Left: Logo */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group" aria-label="FoodBridge Homepage">
             <Logo className="w-10 h-10" showText={true} />
@@ -266,5 +271,6 @@ export function Navbar({
         </div>
       )}
     </header>
+    </>
   );
 }

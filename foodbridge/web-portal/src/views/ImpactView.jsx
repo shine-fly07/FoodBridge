@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Leaf, Utensils, Scale, Award, ShieldAlert, FileText, CheckCircle2, TrendingUp, Calendar } from "lucide-react";
+import { Leaf, Utensils, Scale, FileText, CheckCircle2, TrendingUp, Calendar } from "lucide-react";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Loader } from "../components/ui/Loader";
@@ -52,7 +52,7 @@ export function ImpactView() {
       <div className="pb-6 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-2 mb-1.5">
           <span className="px-2.5 py-0.5 rounded-full text-xs font-bold font-['Quicksand'] bg-emerald-50 text-emerald-800 border border-emerald-200">
-            UN Sustainable Development Goals
+            Verified Community Food Security
           </span>
         </div>
         <h1 className="font-['Fraunces'] text-3xl sm:text-4xl font-extrabold text-[var(--color-forest-text)]">

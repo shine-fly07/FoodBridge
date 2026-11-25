@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Utensils, Scale, Leaf, Globe, Building, Award, ShieldAlert } from "lucide-react";
+import { Utensils, Scale, Leaf, Globe, Building } from "lucide-react";
 import { Card } from "./ui/Card";
 import { calculateWasteKg, calculateCo2eKg } from "../constants/impact";
 
@@ -20,7 +20,7 @@ export function ImpactStats({ impactData, myOrgImpactData, activeRole }) {
             <span>Environmental Impact & Resource Diversion</span>
           </h2>
           <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-            Verified SDG 2 (Zero Hunger) & SDG 12 (Responsible Consumption) metrics computed live from rescue logs.
+            Verified resource diversion metrics computed live from rescue logs.
           </p>
         </div>
 
