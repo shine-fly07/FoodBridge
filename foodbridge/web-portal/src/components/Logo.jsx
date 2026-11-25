@@ -79,16 +79,16 @@ export function Logo({ className = "w-10 h-10", showText = true }) {
 
       {showText && (
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-extrabold tracking-tight text-white leading-none">
-              Food<span className="text-emerald-400">Bridge</span>
-            </h1>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 text-slate-300 border border-slate-800 font-mono">
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg sm:text-xl font-extrabold tracking-tight text-[var(--color-forest-text)] leading-none">
+              Food<span className="text-[var(--color-leaf-green)]">Bridge</span>
+            </span>
+            <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono">
               v2.4 Live
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 font-medium leading-tight mt-0.5">
-            Surplus Food Rescue & River Bridge Logistics
+          <p className="hidden sm:block text-[11px] text-[var(--color-text-muted)] font-medium leading-tight mt-0.5">
+            Surplus Food Rescue &amp; Logistics
           </p>
         </div>
       )}

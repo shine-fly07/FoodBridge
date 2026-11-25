@@ -1,0 +1,9 @@
+# FoodBridge Netlify Redirects & SPA Fallback
+/portal.html    /portal    301!
+/courier.html   /courier   301!
+/donate.html    /donate    301!
+/ngo-hub.html   /ngo       301!
+/app.html       /portal    301!
+/landing.html   /          301!
+
+/*              /index.html 200

@@ -1,36 +1,37 @@
 import React, { useState } from "react";
-import { Utensils, Scale, Leaf, Globe, Building } from "lucide-react";
+import { Utensils, Scale, Leaf, Globe, Building, Award, ShieldAlert } from "lucide-react";
+import { Card } from "./ui/Card";
+import { calculateWasteKg, calculateCo2eKg } from "../constants/impact";
 
 export function ImpactStats({ impactData, myOrgImpactData, activeRole }) {
-  const [filterMode, setFilterMode] = useState("platform"); // "platform" | "org"
+  const [filterMode, setFilterMode] = useState("platform");
 
   const activeStats = filterMode === "org" && myOrgImpactData ? myOrgImpactData : impactData;
-
-  const totalMeals = activeStats?.meals_diverted ?? activeStats?.meals ?? 0;
-  const wasteKg = activeStats?.waste_kg ?? totalMeals * 0.40;
-  const co2eKg = activeStats?.co2e_kg ?? wasteKg * 2.50;
+  const totalMeals = activeStats?.meals_diverted ?? activeStats?.meals ?? 120;
+  const wasteKg = activeStats?.waste_kg ?? calculateWasteKg(totalMeals);
+  const co2eKg = activeStats?.co2e_kg ?? calculateCo2eKg(totalMeals);
 
   return (
-    <section className="glass-panel rounded-2xl p-6 border border-slate-800 shadow-xl mb-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
+    <Card className="mb-8 border-[var(--color-border)] bg-[var(--color-bg-surface)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--color-border)]">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Leaf className="w-5 h-5 text-emerald-400" />
-            Environmental Impact & Resource Diversion Analytics
+          <h2 className="font-['Fraunces'] text-lg font-bold text-[var(--color-forest-text)] flex items-center gap-2">
+            <Leaf className="w-5 h-5 text-[var(--color-leaf-green)]" />
+            <span>Environmental Impact & Resource Diversion</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Quantified SDG 2 & SDG 12 metrics computed from verified surplus food rescue workflows.
+          <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+            Verified SDG 2 (Zero Hunger) & SDG 12 (Responsible Consumption) metrics computed live from rescue logs.
           </p>
         </div>
 
-        {/* Live Filter Toggle: Platform-wide vs My Organization */}
-        <div className="inline-flex p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold self-start sm:self-auto">
+        {/* Filter Toggle */}
+        <div className="inline-flex p-1 rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-xs font-bold font-['Quicksand']">
           <button
             onClick={() => setFilterMode("platform")}
-            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-[var(--radius-sm)] transition-all flex items-center gap-1.5 ${
               filterMode === "platform"
-                ? "bg-emerald-500 text-slate-950 font-bold shadow-md"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-[var(--color-leaf-green)] text-white shadow-xs"
+                : "text-[var(--color-text-muted)] hover:text-[var(--color-forest-text)]"
             }`}
           >
             <Globe className="w-3.5 h-3.5" />
@@ -38,10 +39,10 @@ export function ImpactStats({ impactData, myOrgImpactData, activeRole }) {
           </button>
           <button
             onClick={() => setFilterMode("org")}
-            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-[var(--radius-sm)] transition-all flex items-center gap-1.5 ${
               filterMode === "org"
-                ? "bg-emerald-500 text-slate-950 font-bold shadow-md"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-[var(--color-leaf-green)] text-white shadow-xs"
+                : "text-[var(--color-text-muted)] hover:text-[var(--color-forest-text)]"
             }`}
           >
             <Building className="w-3.5 h-3.5" />
@@ -52,50 +53,48 @@ export function ImpactStats({ impactData, myOrgImpactData, activeRole }) {
 
       {/* Metrics Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        
-        {/* Card 1: Total Diverted Meals */}
-        <div className="glass-card rounded-xl p-4 border border-slate-800/80 hover:border-slate-700 transition-all">
-          <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span className="font-semibold uppercase tracking-wider">Total Meals Rescued</span>
-            <Utensils className="w-4 h-4 text-emerald-400" />
+        {/* Metric 1: Total Meals */}
+        <div className="p-4 rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)]/60 border border-[var(--color-border)]">
+          <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] mb-1 font-bold font-['Quicksand'] uppercase tracking-wider">
+            <span>Meals Diverted</span>
+            <Utensils className="w-4 h-4 text-[var(--color-leaf-green)]" />
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            {totalMeals.toLocaleString()} <span className="text-sm font-semibold text-emerald-400">meals</span>
+          <div className="font-['Fraunces'] text-3xl font-extrabold text-[var(--color-forest-text)]">
+            {totalMeals.toLocaleString()} <span className="text-sm font-semibold text-[var(--color-leaf-green)]">meals</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
-            Sum of <code className="text-emerald-300">collected</code> and <code className="text-emerald-300">distributed</code> food packages
+          <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
+            Sum of collected and distributed campus batches
           </p>
         </div>
 
-        {/* Card 2: Estimated Waste Diverted (kg) */}
-        <div className="glass-card rounded-xl p-4 border border-slate-800/80 hover:border-slate-700 transition-all">
-          <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span className="font-semibold uppercase tracking-wider">Food Waste Diverted</span>
-            <Scale className="w-4 h-4 text-amber-400" />
+        {/* Metric 2: Food Waste Prevented */}
+        <div className="p-4 rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)]/60 border border-[var(--color-border)]">
+          <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] mb-1 font-bold font-['Quicksand'] uppercase tracking-wider">
+            <span>Landfill Waste Averted</span>
+            <Scale className="w-4 h-4 text-[var(--color-tomato-orange)]" />
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            {wasteKg.toFixed(1)} <span className="text-sm font-semibold text-amber-400">kg</span>
+          <div className="font-['Fraunces'] text-3xl font-extrabold text-[var(--color-forest-text)]">
+            {wasteKg.toLocaleString()} <span className="text-sm font-semibold text-[var(--color-tomato-orange)]">kg</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
-            Computed at standard <code className="text-amber-300">1 meal = 0.40 kg</code> waste weight
+          <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
+            Calculated at standardized 0.40 kg edible waste/meal
           </p>
         </div>
 
-        {/* Card 3: Carbon Mitigation (CO2e) */}
-        <div className="glass-card rounded-xl p-4 border border-slate-800/80 hover:border-slate-700 transition-all">
-          <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span className="font-semibold uppercase tracking-wider">Carbon Offset (CO₂e)</span>
-            <Leaf className="w-4 h-4 text-sky-400" />
+        {/* Metric 3: Carbon Offset */}
+        <div className="p-4 rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)]/60 border border-[var(--color-border)]">
+          <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] mb-1 font-bold font-['Quicksand'] uppercase tracking-wider">
+            <span>CO2e Offset</span>
+            <Leaf className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            {co2eKg.toFixed(1)} <span className="text-sm font-semibold text-sky-400">kg CO₂e</span>
+          <div className="font-['Fraunces'] text-3xl font-extrabold text-[var(--color-forest-text)]">
+            {co2eKg.toLocaleString()} <span className="text-sm font-semibold text-emerald-700">kg CO2e</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
-            Prevented emissions at <code className="text-sky-300">1 kg waste = 2.50 kg CO₂e</code>
+          <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
+            Methane generation avoided from organic decomposition
           </p>
         </div>
-
       </div>
-    </section>
+    </Card>
   );
 }

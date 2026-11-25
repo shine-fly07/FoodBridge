@@ -4,11 +4,21 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch --env-file=../.env src/server.js",
-    "start": "node --env-file=../.env src/server.js"
+    "start": "node --env-file=../.env src/server.js",
+    "db:migrate": "node --env-file=../.env database/migrate.js",
+    "db:seed": "node --env-file=../.env database/seed.js",
+    "db:init": "node --env-file=../.env database/migrate.js && node --env-file=../.env database/seed.js",
+    "test": "node --env-file=../.env --test test/*.test.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "pg": "^8.12.0"
+    "express-rate-limit": "^8.7.5",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.12.0",
+    "supertest": "^7.3.2",
+    "zod": "^4.6.7"
   }
 }

@@ -1,362 +1,286 @@
 import React, { useState } from "react";
-import { Mail, Lock, User, Building, ShieldCheck, X, Sparkles, KeyRound } from "lucide-react";
-import { apiCall } from "../services/api";
+import { Mail, Lock, User, Building, AlertCircle, Sparkles, KeyRound } from "lucide-react";
+import { Modal } from "./ui/Modal";
+import { Button } from "./ui/Button";
+import { Input, Select } from "./ui/FormField";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "./ui/Toast";
 
-export function AuthModal({ isOpen, onClose, onAuthenticate, toast }) {
-  const [tab, setTab] = useState("login"); // "login" | "register" | "quick"
-  
-  // Login State
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [loginRole, setLoginRole] = useState("donor");
+export function AuthModal({ isOpen, onClose, options = {} }) {
+  const { login, signup } = useAuth();
+  const toast = useToast();
+  const [tab, setTab] = useState("quick"); // "quick" | "account"
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
 
-  // Register State
-  const [regName, setRegName] = useState("");
-  const [regEmail, setRegEmail] = useState("");
-  const [regRole, setRegRole] = useState("donor");
-  const [regOrg, setRegOrg] = useState("");
-  const [regPassword, setRegPassword] = useState("");
-
-  if (!isOpen) return null;
-
+  // Quick Demo Accounts
   const demoAccounts = [
     {
       name: "Campus Canteen Manager",
-      email: "canteen@foodbridge.org",
       role: "donor",
       org: "Green Valley Dining Hall",
+      email: "donor@foodbridge.org",
       id: 1,
     },
     {
       name: "Courier Alex",
-      email: "courier.alex@foodbridge.org",
       role: "volunteer",
       org: "Swift Rescue Network",
+      email: "volunteer@foodbridge.org",
       id: 2,
     },
     {
       name: "Hope Shelter Staff",
-      email: "shelter.hope@foodbridge.org",
       role: "ngo",
       org: "Hope Community Shelter",
+      email: "ngo@foodbridge.org",
       id: 3,
     },
   ];
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!loginEmail.trim() || !loginEmail.includes("@")) {
-      toast("Please enter a valid email address.", "error");
-      return;
+  // Form states
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("donor");
+  const [org, setOrg] = useState("");
+  const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      if (options.role) {
+        setRole(options.role);
+      }
+      if (options.tab) {
+        setTab(options.tab);
+      }
     }
+  }, [isOpen, options]);
 
-    const name = loginEmail.split("@")[0].replace(/[._]/g, " ");
-    const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-
+  async function handleQuickSelect(acc) {
     try {
-      const user = await apiCall("/api/users/login", {
-        method: "POST",
-        body: { name: formattedName, role: loginRole },
-      });
-
-      const authenticatedUser = {
-        id: user.id || (loginRole === "donor" ? 1 : loginRole === "volunteer" ? 2 : 3),
-        email: loginEmail.trim().toLowerCase(),
-        name: user.name || formattedName,
-        role: user.role || loginRole,
-        org: user.org || (loginRole === "donor" ? "Campus Food Donor" : loginRole === "volunteer" ? "Rescue Courier" : "Community NGO"),
-      };
-
-      onAuthenticate(authenticatedUser);
-      toast(`Authenticated as ${authenticatedUser.email} (${authenticatedUser.role.toUpperCase()})`, "success");
+      setLoading(true);
+      await login({ demoRole: acc.role });
+      toast.success(`Active as ${acc.name} (${acc.role.toUpperCase()}).`);
       onClose();
+      if (options.onLoginSuccess) {
+        try {
+          await options.onLoginSuccess(acc);
+        } catch (_e) {}
+      }
     } catch (err) {
-      toast(err.message || "Authentication failed", "error");
+      toast.error(err.message || "Failed to switch role");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
-  const handleRegister = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!regName.trim()) {
-      toast("Please enter your full name.", "error");
-      return;
-    }
-    if (!regEmail.trim() || !regEmail.includes("@")) {
-      toast("Please enter a valid email address.", "error");
-      return;
-    }
 
     try {
-      const user = await apiCall("/api/users", {
-        method: "POST",
-        body: {
-          name: regName.trim(),
-          role: regRole,
-          org: regOrg.trim() || `${regName.trim()}'s Organization`,
-        },
-      });
+      setLoading(true);
 
-      const newUser = {
-        id: user.id || `usr_${Date.now().toString().slice(-4)}`,
-        email: regEmail.trim().toLowerCase(),
-        name: user.name || regName.trim(),
-        role: user.role || regRole,
-        org: user.org || regOrg.trim() || `${regName}'s Organization`,
-      };
+      if (isRegisterMode) {
+        if (!name.trim()) {
+          toast.error("Please enter your full name.");
+          setLoading(false);
+          return;
+        }
+        if (!email.trim()) {
+          toast.error("Please enter a valid email address.");
+          setLoading(false);
+          return;
+        }
+        if (!password || password.length < 8) {
+          toast.error("Password must be at least 8 characters.");
+          setLoading(false);
+          return;
+        }
 
-      onAuthenticate(newUser);
-      toast(`Account created! Welcome, ${newUser.name} (${newUser.role.toUpperCase()})`, "success");
-      onClose();
+        const registeredUser = await signup({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+          role,
+          org: org.trim() || undefined,
+          phone: phone.trim() || undefined,
+        });
+
+        toast.success(`Account created successfully! Welcome, ${registeredUser.name}.`);
+        onClose();
+        if (options.onLoginSuccess) {
+          try {
+            await options.onLoginSuccess(registeredUser);
+          } catch (_e) {}
+        }
+      } else {
+        // Sign in mode
+        if (!email.trim() || !password) {
+          toast.error("Please enter both email and password.");
+          setLoading(false);
+          return;
+        }
+
+        const loggedInUser = await login({
+          email: email.trim(),
+          password,
+        });
+
+        toast.success(`Signed in as ${loggedInUser.name}!`);
+        onClose();
+        if (options.onLoginSuccess) {
+          try {
+            await options.onLoginSuccess(loggedInUser);
+          } catch (_e) {}
+        }
+      }
     } catch (err) {
-      toast(err.message || "Registration failed", "error");
+      toast.error(err.message || "Authentication failed. Please verify credentials.");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleQuickSelect = async (acc) => {
-    try {
-      const user = await apiCall("/api/users/login", {
-        method: "POST",
-        body: { name: acc.name, role: acc.role, org: acc.org },
-      });
-      const authenticatedUser = {
-        ...acc,
-        id: user.id || acc.id,
-        name: user.name || acc.name,
-        role: user.role || acc.role,
-        org: user.org || acc.org,
-      };
-      onAuthenticate(authenticatedUser);
-      toast(`Signed in with demo email: ${acc.email}`, "success");
-      onClose();
-    } catch (_err) {
-      onAuthenticate(acc);
-      toast(`Signed in with demo email: ${acc.email}`, "success");
-      onClose();
-    }
-  };
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div className="glass-panel w-full max-w-lg rounded-2xl border border-slate-800 shadow-2xl overflow-hidden relative">
-        
-        {/* Modal Header */}
-        <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 p-6 border-b border-slate-800 relative">
-          <button
-            onClick={onClose}
-            className="absolute top-5 right-5 p-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <Mail className="w-4 h-4" />
-            </div>
-            <h2 className="text-lg font-extrabold text-white">Email Authentication</h2>
+    <Modal isOpen={isOpen} onClose={onClose} title="FoodBridge Authentication" maxWidth="max-w-md">
+      <div className="space-y-4">
+        {options.message && (
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-[var(--radius-md)] flex items-start gap-2 text-xs text-amber-800">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <span>{options.message}</span>
           </div>
-          <p className="text-xs text-slate-400">
-            Sign in with your email address to access food donor, courier, and NGO rescue portals.
-          </p>
-        </div>
+        )}
 
-        {/* Auth Navigation Tabs */}
-        <div className="flex border-b border-slate-800 bg-slate-900/60">
+        {/* Tab Switcher */}
+        <div className="grid grid-cols-2 gap-1.5 p-1 bg-[var(--color-bg-subtle)] rounded-[var(--radius-md)] border border-[var(--color-border)]">
           <button
-            onClick={() => setTab("login")}
-            className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 ${
-              tab === "login"
-                ? "text-emerald-400 border-emerald-400 bg-slate-900"
-                : "text-slate-400 border-transparent hover:text-slate-200"
-            }`}
-          >
-            🔑 Email Sign In
-          </button>
-          <button
-            onClick={() => setTab("register")}
-            className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 ${
-              tab === "register"
-                ? "text-emerald-400 border-emerald-400 bg-slate-900"
-                : "text-slate-400 border-transparent hover:text-slate-200"
-            }`}
-          >
-            📝 Register
-          </button>
-          <button
+            type="button"
             onClick={() => setTab("quick")}
-            className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 ${
+            className={`py-1.5 text-xs font-bold font-['Quicksand'] rounded-[var(--radius-sm)] transition-all ${
               tab === "quick"
-                ? "text-emerald-400 border-emerald-400 bg-slate-900"
-                : "text-slate-400 border-transparent hover:text-slate-200"
+                ? "bg-[var(--color-bg-surface)] text-[var(--color-leaf-green)] shadow-xs"
+                : "text-[var(--color-text-muted)] hover:text-[var(--color-forest-text)]"
             }`}
           >
-            ⚡ Demo Accounts
+            One-Click Profiles
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("account")}
+            className={`py-1.5 text-xs font-bold font-['Quicksand'] rounded-[var(--radius-sm)] transition-all ${
+              tab === "account"
+                ? "bg-[var(--color-bg-surface)] text-[var(--color-leaf-green)] shadow-xs"
+                : "text-[var(--color-text-muted)] hover:text-[var(--color-forest-text)]"
+            }`}
+          >
+            {isRegisterMode ? "Register Account" : "Email Sign In"}
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6">
-          
-          {/* Tab 1: Email Login */}
-          {tab === "login" && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-emerald-400" />
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  placeholder="e.g. manager@dininghall.org"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-amber-400" />
-                  Password / PIN (Optional for Demo)
-                </label>
-                <input
-                  type="password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300">Operational Role *</label>
-                <select
-                  value={loginRole}
-                  onChange={(e) => setLoginRole(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                >
-                  <option value="donor">Food Donor (Restaurant / Canteen / Event)</option>
-                  <option value="volunteer">Volunteer Courier (Rescue Courier)</option>
-                  <option value="ngo">NGO Distribution Hub (Shelter / Center)</option>
-                </select>
-              </div>
-
+        {tab === "quick" ? (
+          <div className="space-y-2.5 pt-1">
+            <p className="text-xs text-[var(--color-text-muted)]">
+              Choose a pre-configured role to immediately test real donor listings, volunteer pickups, and shelter receipts:
+            </p>
+            {demoAccounts.map((acc) => (
               <button
-                type="submit"
-                className="w-full py-3 mt-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
+                key={acc.id}
+                type="button"
+                onClick={() => handleQuickSelect(acc)}
+                disabled={loading}
+                className="w-full p-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] hover:bg-[var(--color-bg-subtle)] hover:border-[var(--color-leaf-green)] transition-all text-left flex items-center justify-between group shadow-xs"
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Authenticate &amp; Access Portal</span>
-              </button>
-            </form>
-          )}
-
-          {/* Tab 2: Register Account */}
-          {tab === "register" && (
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-emerald-400" />
-                  Full Name / Representative Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={regName}
-                  onChange={(e) => setRegName(e.target.value)}
-                  placeholder="e.g. Sarah Jenkins"
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-emerald-400" />
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={regEmail}
-                  onChange={(e) => setRegEmail(e.target.value)}
-                  placeholder="e.g. sarah@dininghall.org"
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300">Operational Role *</label>
-                <select
-                  value={regRole}
-                  onChange={(e) => setRegRole(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all"
-                >
-                  <option value="donor">Food Donor (Dining Hall, Hotel, Bakery)</option>
-                  <option value="volunteer">Volunteer Courier (Rescue Logistics)</option>
-                  <option value="ngo">Community NGO / Shelter Center</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <Building className="w-3.5 h-3.5 text-sky-400" />
-                  Organization / Facility Name
-                </label>
-                <input
-                  type="text"
-                  value={regOrg}
-                  onChange={(e) => setRegOrg(e.target.value)}
-                  placeholder="e.g. Green Valley Dining Hall"
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 mt-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Create Account &amp; Start Session</span>
-              </button>
-            </form>
-          )}
-
-          {/* Tab 3: Quick Demo Email Accounts */}
-          {tab === "quick" && (
-            <div className="space-y-3">
-              <p className="text-xs text-slate-400 mb-2">
-                Click any pre-configured email account for instant 1-click authentication test access:
-              </p>
-              {demoAccounts.map((acc) => (
-                <div
-                  key={acc.email}
-                  onClick={() => handleQuickSelect(acc)}
-                  className="p-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition-all flex items-center justify-between group"
-                >
-                  <div>
-                    <div className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors flex items-center gap-2">
-                      <Mail className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>{acc.email}</span>
-                    </div>
-                    <div className="text-xs text-slate-400 mt-0.5">
-                      {acc.name} &bull; {acc.org}
-                    </div>
+                <div>
+                  <div className="text-sm font-bold font-['Quicksand'] text-[var(--color-forest-text)] group-hover:text-[var(--color-leaf-green)]">
+                    {acc.name}
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                    acc.role === "donor" ? "bg-emerald-500/20 text-emerald-300" :
-                    acc.role === "volunteer" ? "bg-amber-500/20 text-amber-300" :
-                    "bg-sky-500/20 text-sky-300"
-                  }`}>
-                    {acc.role}
-                  </span>
+                  <div className="text-xs text-[var(--color-text-muted)]">
+                    {acc.org} &bull; <span className="capitalize font-semibold text-[var(--color-leaf-green)]">{acc.role}</span>
+                  </div>
                 </div>
-              ))}
+                <div className="px-2 py-1 rounded-full text-[11px] font-bold bg-[var(--color-leaf-green-alpha)] text-[var(--color-leaf-green)]">
+                  Use Role
+                </div>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-3.5 pt-1">
+            {isRegisterMode && (
+              <Input
+                label="Full Name"
+                placeholder="e.g. Maria Gonzalez"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            )}
+
+            <Input
+              label="Email Address"
+              type="email"
+              placeholder="e.g. you@organization.org"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <Input
+              label="Password"
+              type="password"
+              placeholder={isRegisterMode ? "At least 8 characters" : "Enter your password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+
+            {isRegisterMode && (
+              <>
+                <Select
+                  label="Community Role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                >
+                  <option value="donor">Food Donor (Canteen / Restaurant / Hostel)</option>
+                  <option value="volunteer">Volunteer Courier (Pickup &amp; Deliver)</option>
+                  <option value="ngo">NGO Shelter Hub (Recipient Kitchen)</option>
+                </Select>
+
+                <Input
+                  label="Organization / Kitchen Name"
+                  placeholder="e.g. Green Valley Dining Hall"
+                  value={org}
+                  onChange={(e) => setOrg(e.target.value)}
+                />
+
+                <Input
+                  label="Phone Number (Optional)"
+                  placeholder="e.g. +91 98765 43210"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </>
+            )}
+
+            <Button type="submit" variant="primary" loading={loading} className="w-full mt-2">
+              {isRegisterMode ? "Create FoodBridge Account" : "Sign In to FoodBridge"}
+            </Button>
+
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={() => setIsRegisterMode(!isRegisterMode)}
+                className="text-xs font-semibold text-[var(--color-leaf-green)] hover:underline"
+              >
+                {isRegisterMode
+                  ? "Already have an account? Sign in"
+                  : "Need a new account? Register here"}
+              </button>
             </div>
-          )}
-
-        </div>
-
+          </form>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 }

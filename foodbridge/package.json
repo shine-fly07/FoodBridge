@@ -2,16 +2,24 @@
   "name": "foodbridge",
   "private": true,
   "version": "0.1.0",
+  "type": "module",
   "description": "FoodBridge: connects surplus food from restaurants, canteens and hostels with volunteers and NGOs, with an expiry countdown and a side game.",
   "scripts": {
     "build": "npm --prefix web-portal run build",
     "build:portal": "npm --prefix web-portal run build",
+    "preview": "npm --prefix web-portal run preview",
     "dev": "npm --prefix web-portal run dev",
-    "dev:all": "npm --prefix backend run dev & npm --prefix web-portal run dev",
-    "install:all": "npm --prefix backend install && npm --prefix game-client install && npm --prefix web-portal install",
     "dev:backend": "npm --prefix backend run dev",
     "dev:game": "npm --prefix game-client run dev",
     "dev:portal": "npm --prefix web-portal run dev",
-    "db:init": "psql \"$DATABASE_URL\" -f backend/database/schema.sql"
+    "dev:all": "npm --prefix backend run dev & npm --prefix web-portal run dev",
+    "install:all": "npm --prefix backend install && npm --prefix game-client install && npm --prefix web-portal install",
+    "db:migrate": "npm --prefix backend run db:migrate",
+    "db:seed": "npm --prefix backend run db:seed",
+    "db:init": "npm --prefix backend run db:init",
+    "test:backend": "npm --prefix backend test",
+    "test:e2e": "node test_browser_suite.cjs",
+    "test": "npm run test:backend && npm run test:e2e",
+    "kill:ports": "node scripts/kill_ports.js"
   }
 }

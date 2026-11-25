@@ -1,567 +1,215 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
-import { DonorForm } from "./components/DonorForm";
-import { ListingCard } from "./components/ListingCard";
-import { ImpactStats } from "./components/ImpactStats";
+import { Footer } from "./components/Footer";
 import { AuthModal } from "./components/AuthModal";
-import { calculateExpiryMetrics } from "./hooks/useCountdown";
-import { apiCall, getCurrentUser } from "./services/api";
-import { Truck, Building2, AlertTriangle, Layers, Clock, Sparkles } from "lucide-react";
+import { ToastProvider, useToast } from "./components/ui/Toast";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useListings } from "./hooks/useListings";
+import { subscribeDemoMode, checkBackendHealth, fetchImpactSummary, fetchMonthlyImpact } from "./services/api";
 
-export function App() {
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem("fb_auth_user");
-      if (saved) return JSON.parse(saved);
-    } catch (_e) {}
-    return getCurrentUser("donor");
-  });
+import { Loader } from "./components/ui/Loader";
 
-  const [activeRole, setActiveRole] = useState(() => currentUser?.role || "donor");
-  const [activeTab, setActiveTab] = useState("board"); // "board" | "my_pickups" | "distribution" | "donor_form"
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  
-  const [listings, setListings] = useState([]);
+import { LandingView } from "./views/LandingView";
+const DonateView = React.lazy(() => import("./views/DonateView").then((m) => ({ default: m.DonateView })));
+const CourierView = React.lazy(() => import("./views/CourierView").then((m) => ({ default: m.CourierView })));
+const NgoView = React.lazy(() => import("./views/NgoView").then((m) => ({ default: m.NgoView })));
+const PortalView = React.lazy(() => import("./views/PortalView").then((m) => ({ default: m.PortalView })));
+const ImpactView = React.lazy(() => import("./views/ImpactView").then((m) => ({ default: m.ImpactView })));
+const NotFoundView = React.lazy(() => import("./views/NotFoundView").then((m) => ({ default: m.NotFoundView })));
+const GameRedirectView = React.lazy(() => import("./views/GameRedirectView").then((m) => ({ default: m.GameRedirectView })));
+
+/**
+ * Handles smooth scrolling to landing anchors (#problem, #how-it-works, #impact, #get-involved)
+ * or scrolls to top on route change.
+ */
+function ScrollHandler() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const titles = {
+      "/": "FoodBridge — Surplus Food Rescue Platform",
+      "/donate": "Donate Surplus Food — FoodBridge",
+      "/courier": "Volunteer Courier Board — FoodBridge",
+      "/ngo": "NGO Shelter Hub — FoodBridge",
+      "/portal": "Rescue Control Center — FoodBridge",
+      "/impact": "Quantified Impact & Audits — FoodBridge",
+      "/game": "2D Food Rescue Runner — FoodBridge",
+    };
+    const title = titles[location.pathname] || (location.pathname.startsWith("/portal/") ? "Rescue Control Center — FoodBridge" : "FoodBridge");
+    document.title = title;
+
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth" });
+        }, 80);
+      }
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname, location.hash]);
+
+  return null;
+}
+
+function MainAppContent() {
+  const { currentUser, activeRole, setActiveRole, authModalOpen, authModalOptions, openAuthModal, closeAuthModal, logout } = useAuth();
+  const { listings, loading, refresh, addListing, claim, collect, distribute, cancel, totalDivertedMeals, availableListings } = useListings();
+
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [impactData, setImpactData] = useState(null);
   const [myOrgImpactData, setMyOrgImpactData] = useState(null);
-  const [toastMessage, setToastMessage] = useState(null);
-  const [toastType, setToastType] = useState("info");
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const triggerToast = useCallback((msg, type = "info") => {
-    setToastMessage(msg);
-    setToastType(type);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 4500);
+  useEffect(() => {
+    checkBackendHealth();
+    return subscribeDemoMode((active) => {
+      setIsDemoMode(active);
+    });
   }, []);
 
-  // Sync role selection with current user
-  const handleRoleChange = (role) => {
-    setActiveRole(role);
-    if (currentUser) {
-      const updatedUser = { ...currentUser, role };
-      setCurrentUser(updatedUser);
+  useEffect(() => {
+    async function loadStats() {
       try {
-        localStorage.setItem("fb_auth_user", JSON.stringify(updatedUser));
+        const [sum, mth] = await Promise.all([fetchImpactSummary(), fetchMonthlyImpact()]);
+        setImpactData(sum);
+        setMyOrgImpactData(mth);
       } catch (_e) {}
     }
-    if (role === "donor") setActiveTab("donor_form");
-    else if (role === "volunteer") setActiveTab("board");
-    else if (role === "ngo") setActiveTab("distribution");
+    loadStats();
+  }, [listings]);
+
+  const handleAction = async (id, actionType) => {
+    if (actionType === "claim") return claim(id);
+    if (actionType === "collect") return collect(id);
+    if (actionType === "distribute") return distribute(id);
+    if (actionType === "cancel") return cancel(id);
   };
-
-  const handleAuthenticate = (user) => {
-    setCurrentUser(user);
-    try {
-      localStorage.setItem("fb_auth_user", JSON.stringify(user));
-    } catch (_e) {}
-    handleRoleChange(user.role);
-  };
-
-  const handleLogout = () => {
-    try {
-      localStorage.removeItem("fb_auth_user");
-    } catch (_e) {}
-    setCurrentUser(null);
-    triggerToast("Signed out. Operating in guest view.", "info");
-  };
-
-  // Fetch listings and impact metrics from API
-  const fetchData = useCallback(async () => {
-    setIsRefreshing(true);
-    const userId = currentUser?.id || "usr_101";
-    const userRole = currentUser?.role || activeRole || "donor";
-    try {
-      const [listData, impactSummary, myOrgSummary] = await Promise.all([
-        apiCall("/api/listings", { userId, userRole }),
-        apiCall("/api/impact/summary", { userId, userRole }),
-        apiCall(`/api/impact/monthly?donorId=${userId}`, { userId, userRole }),
-      ]);
-
-      if (Array.isArray(listData)) {
-        setListings(listData);
-      }
-      setImpactData(impactSummary);
-      setMyOrgImpactData(myOrgSummary);
-    } catch (err) {
-      triggerToast(err.message || "Failed to fetch platform state", "error");
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [currentUser?.id, currentUser?.role, activeRole, triggerToast]);
-
-  // Real-time client logic: Background data re-fetch every 60 seconds
-  useEffect(() => {
-    fetchData();
-
-    const interval = setInterval(() => {
-      fetchData();
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, [fetchData]);
-
-  // Donor post action
-  const handlePostListing = async (formData) => {
-    const activeUser = currentUser || { id: 1, name: "Campus Canteen Manager", role: "donor", org: "Green Valley Dining Hall" };
-    const effectiveRole = activeUser.role === "donor" ? "donor" : activeRole === "donor" ? "donor" : activeUser.role;
-
-    await apiCall("/api/listings", {
-      method: "POST",
-      body: formData,
-      userId: activeUser.id,
-      userRole: effectiveRole,
-    });
-    await fetchData();
-  };
-
-  // Role action (claim, collect, distribute) with 409 Conflict handling
-  const handleListingAction = async (id, act) => {
-    if (!currentUser) {
-      setIsAuthOpen(true);
-      triggerToast("Please authenticate with email to claim or distribute food.", "error");
-      return;
-    }
-    try {
-      await apiCall(`/api/listings/${id}/${act}`, {
-        method: "POST",
-        userId: currentUser.id,
-        userRole: currentUser.role || activeRole,
-      });
-      triggerToast(
-        act === "claim"
-          ? "Pickup claimed! Moved to My Active Pickups."
-          : act === "collect"
-          ? "Marked as collected from donor!"
-          : "Distribute confirmed! Rescue complete.",
-        "success"
-      );
-      await fetchData();
-    } catch (err) {
-      await fetchData();
-      throw err;
-    }
-  };
-
-  // Filter listings based on State Machine & Expiry Rules
-  const availableListings = listings
-    .filter((l) => {
-      if (l.status !== "available") return false;
-      const metrics = calculateExpiryMetrics(l.expires_at);
-      return !metrics.isExpired;
-    })
-    .sort((a, b) => new Date(a.expires_at).getTime() - new Date(b.expires_at).getTime());
-
-  const myClaimedListings = listings.filter((l) => l.status === "claimed");
-  const collectedListings = listings.filter((l) => l.status === "collected");
-  const distributedListings = listings.filter((l) => l.status === "distributed");
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      
-      {/* Top Navbar with Email Auth & Role Switcher */}
+    <div className="flex flex-col min-h-screen bg-[var(--color-bg-cream)] text-[var(--color-forest-text)]">
+      <ScrollHandler />
+
+      {/* Shared Unified Navbar */}
       <Navbar
-        activeRole={activeRole}
-        setActiveRole={handleRoleChange}
         currentUser={currentUser}
-        totalDivertedMeals={impactData?.meals_diverted ?? 0}
-        onRefresh={fetchData}
-        onOpenAuth={() => setIsAuthOpen(true)}
-        onLogout={handleLogout}
+        activeRole={activeRole}
+        onSelectRole={setActiveRole}
+        onOpenAuth={openAuthModal}
+        onLogout={logout}
+        onRefresh={refresh}
+        totalDivertedMeals={totalDivertedMeals}
+        isDemoMode={isDemoMode}
       />
 
-      {/* Auth Dialog Modal */}
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onAuthenticate={handleAuthenticate}
-        toast={triggerToast}
-      />
+      {/* Main Route Content */}
+      <main className="flex-1">
+        <React.Suspense fallback={<Loader text="Loading FoodBridge view..." className="py-20" />}>
+          <Routes>
+          {/* Main SPA Pages */}
+          <Route
+            path="/"
+            element={
+              <LandingView
+                totalDivertedMeals={totalDivertedMeals}
+                activeListingsCount={availableListings.length}
+                listings={listings}
+                availableListings={availableListings}
+                onAction={handleAction}
+              />
+            }
+          />
+          <Route
+            path="/donate"
+            element={
+              <DonateView
+                listings={listings}
+                onPostListing={addListing}
+                onAction={handleAction}
+              />
+            }
+          />
+          <Route
+            path="/courier"
+            element={
+              <CourierView
+                listings={listings}
+                onAction={handleAction}
+              />
+            }
+          />
+          <Route
+            path="/ngo"
+            element={
+              <NgoView
+                listings={listings}
+                onAction={handleAction}
+              />
+            }
+          />
+          <Route
+            path="/portal"
+            element={
+              <PortalView
+                listings={listings}
+                onPostListing={addListing}
+                onAction={handleAction}
+                impactData={impactData}
+                myOrgImpactData={myOrgImpactData}
+              />
+            }
+          />
+          <Route
+            path="/portal/:role"
+            element={
+              <PortalView
+                listings={listings}
+                onPostListing={addListing}
+                onAction={handleAction}
+                impactData={impactData}
+                myOrgImpactData={myOrgImpactData}
+              />
+            }
+          />
+          <Route path="/impact" element={<ImpactView />} />
+          <Route path="/login" element={<Navigate to="/portal" replace />} />
+          <Route path="/signup" element={<Navigate to="/portal" replace />} />
+          <Route path="/game" element={<GameRedirectView />} />
 
-      {/* Toast Notification Banner */}
-      {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 animate-bounce">
-          <div
-            className={`px-4 py-3 rounded-xl border shadow-2xl text-xs font-bold flex items-center gap-2.5 backdrop-blur-md ${
-              toastType === "error"
-                ? "bg-rose-500/90 text-white border-rose-400"
-                : toastType === "success"
-                ? "bg-emerald-500/90 text-slate-950 border-emerald-300"
-                : "bg-sky-500/90 text-white border-sky-400"
-            }`}
-          >
-            <Sparkles className="w-4 h-4 shrink-0" />
-            <span>{toastMessage}</span>
-          </div>
-        </div>
-      )}
+          {/* Legacy multi-page route redirects */}
+          <Route path="/portal.html" element={<Navigate to="/portal" replace />} />
+          <Route path="/courier.html" element={<Navigate to="/courier" replace />} />
+          <Route path="/donate.html" element={<Navigate to="/donate" replace />} />
+          <Route path="/ngo-hub.html" element={<Navigate to="/ngo" replace />} />
+          <Route path="/app.html" element={<Navigate to="/portal" replace />} />
+          <Route path="/landing.html" element={<Navigate to="/" replace />} />
+          <Route path="/index.html" element={<Navigate to="/" replace />} />
 
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
-        
-        {/* Guest Email Authentication Prompt Banner */}
-        {!currentUser && (
-          <div className="glass-card rounded-2xl p-4 sm:p-5 border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3 text-xs text-amber-200">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-              <span>Browsing as Guest. Sign in with your email address to post surplus food or accept rescue pickups.</span>
-            </div>
-            <button
-              onClick={() => setIsAuthOpen(true)}
-              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs shadow-md transition-all whitespace-nowrap"
-            >
-              Sign In with Email
-            </button>
-          </div>
-        {/* Role-Based Operational Step-by-Step Guidance Banner */}
-        <div className="glass-panel rounded-2xl p-5 border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-slate-900/60 to-slate-950/80 shadow-xl space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-extrabold text-sm">
-                {activeRole === "donor" ? "👨‍🍳" : activeRole === "volunteer" ? "🚴" : "🏢"}
-              </div>
-              <div>
-                <h2 className="text-sm font-extrabold text-white flex items-center gap-2">
-                  <span>Welcome, {currentUser ? currentUser.name : "Guest User"}!</span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    {activeRole === "donor" ? "Food Donor Workflow" : activeRole === "volunteer" ? "Volunteer Courier Workflow" : "NGO Shelter Workflow"}
-                  </span>
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {currentUser ? `Account: ${currentUser.email || currentUser.id} • ${currentUser.org}` : "Follow the 3 operational steps below to complete your food rescue session."}
-                </p>
-              </div>
-            </div>
-            
-            <a
-              href="index.html"
-              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-center"
-            >
-              <span>🏠 Landing Page</span>
-            </a>
-          </div>
-
-          {/* 3 Step Process Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {activeRole === "donor" && (
-              <>
-                <div className={`p-3.5 rounded-xl border transition-all ${activeTab === "donor_form" ? "bg-emerald-500/15 border-emerald-500/50" : "bg-slate-900/60 border-slate-800 opacity-75"}`}>
-                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 mb-1">
-                    <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">1</span>
-                    <span>Post Surplus Meals</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">Fill in title, meal count, pickup address, and set live expiry timer.</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 opacity-75">
-                  <div className="flex items-center gap-2 text-xs font-bold text-amber-300 mb-1">
-                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">2</span>
-                    <span>Courier Pickup Dispatch</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">Automated notification alerts nearby volunteer couriers instantly.</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 opacity-75">
-                  <div className="flex items-center gap-2 text-xs font-bold text-sky-300 mb-1">
-                    <span className="w-5 h-5 rounded-full bg-sky-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">3</span>
-                    <span>Track Environmental Impact</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">View diverted meals, kg waste saved, and CO₂ offset analytics.</p>
-                </div>
-              </>
-            )}
-
-            {activeRole === "volunteer" && (
-              <>
-                <div className={`p-3.5 rounded-xl border transition-all ${activeTab === "board" ? "bg-amber-500/15 border-amber-500/50" : "bg-slate-900/60 border-slate-800 opacity-75"}`}>
-                  <div className="flex items-center gap-2 text-xs font-bold text-amber-300 mb-1">
-                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">1</span>
-                    <span>Check Expiry Countdown</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">Filter active listings on the Urgent Board by ticking time windows.</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 opacity-75">
-                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 mb-1">
-                    <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">2</span>
-                    <span>Claim Rescue Pickup</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">Click "Claim Pickup" to reserve urgent food parcels for transit.</p>
-                </div>
-                <div className={`p-3.5 rounded-xl border transition-all ${activeTab === "my_pickups" ? "bg-amber-500/15 border-amber-500/50" : "bg-slate-900/60 border-slate-800 opacity-75"}`}>
-                  <div className="flex items-center gap-2 text-xs font-bold text-sky-300 mb-1">
-                    <span className="w-5 h-5 rounded-full bg-sky-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">3</span>
-                    <span>Collect &amp; Deliver to NGO</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">Mark collected from donor, transport, and hand over to NGO shelter.</p>
-                </div>
-              </>
-            )}
-
-            {activeRole === "ngo" && (
-              <>
-                <div className={`p-3.5 rounded-xl border transition-all ${activeTab === "distribution" ? "bg-purple-500/15 border-purple-500/50" : "bg-slate-900/60 border-slate-800 opacity-75"}`}>
-                  <div className="flex items-center gap-2 text-xs font-bold text-purple-300 mb-1">
-                    <span className="w-5 h-5 rounded-full bg-purple-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">1</span>
-                    <span>Monitor Incoming Shipments</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">View collected meals arriving at your community shelter hub.</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 opacity-75">
-                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 mb-1">
-                    <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">2</span>
-                    <span>Confirm Meal Distribution</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">Confirm receipt to feed families and complete rescue transaction.</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 opacity-75">
-                  <div className="flex items-center gap-2 text-xs font-bold text-amber-300 mb-1">
-                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold text-[10px]">3</span>
-                    <span>Community Audit Verified</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">Meals logged into official community verification ledger.</p>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Environmental & Carbon Impact Analytics Section */}
-        <ImpactStats
-          impactData={impactData}
-          myOrgImpactData={myOrgImpactData}
-          activeRole={activeRole}
-        />
-
-        {/* Dynamic Navigation Sub-Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-          
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-            <button
-              onClick={() => setActiveTab("board")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-                activeTab === "board"
-                  ? "bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20"
-                  : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5" />
-              <span>Urgent Rescue Board</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-slate-950/40 text-[10px] font-mono">
-                {availableListings.length}
-              </span>
-            </button>
-
-            {activeRole === "volunteer" && (
-              <button
-                onClick={() => setActiveTab("my_pickups")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-                  activeTab === "my_pickups"
-                    ? "bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20"
-                    : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
-                }`}
-              >
-                <Truck className="w-3.5 h-3.5" />
-                <span>My Active Pickups</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-slate-950/40 text-[10px] font-mono">
-                  {myClaimedListings.length}
-                </span>
-              </button>
-            )}
-
-            {activeRole === "ngo" && (
-              <button
-                onClick={() => setActiveTab("distribution")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-                  activeTab === "distribution"
-                    ? "bg-purple-500 text-slate-950 shadow-lg shadow-purple-500/20"
-                    : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
-                }`}
-              >
-                <Building2 className="w-3.5 h-3.5" />
-                <span>NGO Distribution Hub</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-slate-950/40 text-[10px] font-mono">
-                  {collectedListings.length}
-                </span>
-              </button>
-            )}
-
-            {activeRole === "donor" && (
-              <button
-                onClick={() => setActiveTab("donor_form")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-                  activeTab === "donor_form"
-                    ? "bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20"
-                    : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span>Post Surplus Listing</span>
-              </button>
-            )}
-          </div>
-
-          <div className="text-xs text-slate-400 flex items-center gap-2">
-            <span>State Sync:</span>
-            <span className="inline-flex items-center gap-1 text-emerald-400 font-mono">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              Auto-tick 30s / Fetch 60s
-            </span>
-          </div>
-
-        </div>
-
-        {/* View 1: Donor Posting Form */}
-        {activeRole === "donor" && activeTab === "donor_form" && (
-          <div className="max-w-3xl mx-auto">
-            <DonorForm
-              onPostListing={handlePostListing}
-              currentUser={currentUser}
-              toast={triggerToast}
-            />
-          </div>
-        )}
-
-        {/* View 2: Urgent Rescue Board (Available listings sorted by soonest expiry) */}
-        {activeTab === "board" && (
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <span>Urgent Rescue Listings</span>
-                  <span className="text-xs font-normal text-slate-400">(Available for Volunteer Claim)</span>
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Sorted by soonest expiry first. Expired items are automatically hidden.
-                </p>
-              </div>
-            </div>
-
-            {availableListings.length === 0 ? (
-              <div className="glass-card rounded-2xl p-12 text-center border border-slate-800">
-                <AlertTriangle className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-sm font-bold text-slate-300">No Available Rescue Listings Right Now</h3>
-                <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                  All posted surplus food has either been claimed by couriers or expired safely. Switch to Donor View to post a new listing!
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {availableListings.map((l) => (
-                  <ListingCard
-                    key={l.id}
-                    listing={l}
-                    activeRole={activeRole}
-                    currentUser={currentUser}
-                    onAction={handleListingAction}
-                    toast={triggerToast}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* View 3: Volunteer Active Pickups */}
-        {activeRole === "volunteer" && activeTab === "my_pickups" && (
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-base font-bold text-white">My Active Claimed Pickups</h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Listings you accepted for rescue courier dispatch. Mark collected once picked up from donor.
-              </p>
-            </div>
-
-            {myClaimedListings.length === 0 ? (
-              <div className="glass-card rounded-2xl p-12 text-center border border-slate-800">
-                <Truck className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-sm font-bold text-slate-300">No Active Pickups Claimed</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Go to the Urgent Rescue Board tab to accept and claim available food pickups!
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {myClaimedListings.map((l) => (
-                  <ListingCard
-                    key={l.id}
-                    listing={l}
-                    activeRole={activeRole}
-                    currentUser={currentUser}
-                    onAction={handleListingAction}
-                    toast={triggerToast}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* View 4: NGO Distribution Hub */}
-        {activeRole === "ngo" && activeTab === "distribution" && (
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-base font-bold text-white">NGO Distribution Hub</h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Surplus food collected by couriers awaiting final distribution to community beneficiaries.
-              </p>
-            </div>
-
-            {collectedListings.length === 0 ? (
-              <div className="glass-card rounded-2xl p-12 text-center border border-slate-800">
-                <Building2 className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-sm font-bold text-slate-300">No Items Awaiting NGO Distribution</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Items marked 'Collected' by rescue couriers will appear here automatically for NGO distribution confirmation.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {collectedListings.map((l) => (
-                  <ListingCard
-                    key={l.id}
-                    listing={l}
-                    activeRole={activeRole}
-                    currentUser={currentUser}
-                    onAction={handleListingAction}
-                    toast={triggerToast}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Section 5: Completed Rescues Board */}
-        {distributedListings.length > 0 && (
-          <section className="pt-8 border-t border-slate-900 space-y-4">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Recently Distributed & Completed Rescues ({distributedListings.length})
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {distributedListings.map((l) => (
-                <div key={l.id} className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs">
-                  <div className="font-bold text-slate-200 line-clamp-1">{l.title}</div>
-                  <div className="text-[11px] text-slate-400 mt-1">{l.meals} meals &bull; {l.ngo_org || "NGO Center"}</div>
-                  <div className="mt-2 text-[10px] text-purple-400 font-semibold">✓ LIFECYCLE COMPLETED</div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
+          {/* 404 Catch-all */}
+          <Route path="*" element={<NotFoundView />} />
+        </Routes>
+        </React.Suspense>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-900 py-6 text-xs text-slate-500 text-center">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div>
-            <strong>FoodBridge Platform</strong> &bull; Client Expiry Sync &amp; Surplus Rescue Architecture
-          </div>
-          <div>
-            UN SDG 2 (Zero Hunger) &amp; SDG 12 (Responsible Consumption)
-          </div>
-        </div>
-      </footer>
+      {/* Shared Unified Footer */}
+      <Footer />
 
+      {/* Auth Modal */}
+      <AuthModal isOpen={authModalOpen} onClose={closeAuthModal} options={authModalOptions} />
     </div>
   );
 }
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <ToastProvider>
+          <MainAppContent />
+        </ToastProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+export default App;

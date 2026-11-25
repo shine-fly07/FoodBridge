@@ -30,12 +30,18 @@ CREATE TABLE IF NOT EXISTS audits (
 
 -- ===== Core platform: surplus food listings =====
 CREATE TABLE IF NOT EXISTS users (
-  id          SERIAL PRIMARY KEY,
-  name        VARCHAR(60) NOT NULL,
-  role        VARCHAR(10) NOT NULL CHECK (role IN ('donor','volunteer','ngo')),
-  org         VARCHAR(80),                       -- restaurant, campus, hostel, NGO name
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+  id            SERIAL PRIMARY KEY,
+  name          VARCHAR(60) NOT NULL,
+  email         VARCHAR(120) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  role          VARCHAR(10) NOT NULL CHECK (role IN ('donor','volunteer','ngo')),
+  org           VARCHAR(80),                       -- restaurant, campus, hostel, NGO name
+  phone         VARCHAR(20),
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_unique ON users (email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users (role);
 
 CREATE TABLE IF NOT EXISTS listings (
   id               SERIAL PRIMARY KEY,
@@ -46,12 +52,14 @@ CREATE TABLE IF NOT EXISTS listings (
   notes            TEXT,
   expires_at       TIMESTAMPTZ NOT NULL,
   status           VARCHAR(12) NOT NULL DEFAULT 'available'
-                   CHECK (status IN ('available','claimed','collected','distributed')),
+                   CHECK (status IN ('available','claimed','collected','distributed','cancelled','expired')),
   volunteer_id     INTEGER REFERENCES users(id),
   ngo_id           INTEGER REFERENCES users(id),
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
   claimed_at       TIMESTAMPTZ,
   collected_at     TIMESTAMPTZ,
-  distributed_at   TIMESTAMPTZ
+  distributed_at   TIMESTAMPTZ,
+  CONSTRAINT chk_expiry_future CHECK (expires_at > created_at)
 );
 CREATE INDEX IF NOT EXISTS idx_listings_status ON listings (status, expires_at);

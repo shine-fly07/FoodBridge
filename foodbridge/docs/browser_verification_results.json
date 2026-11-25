@@ -1,0 +1,212 @@
+[
+  {
+    "id": "LANDING_DESKTOP_LOAD",
+    "element": "Landing page URL",
+    "expected": "Loads status 200 with title",
+    "status": "PASS",
+    "notes": "FoodBridge — Surplus Food Rescue Platform"
+  },
+  {
+    "id": "HERO_H1_CONTENT",
+    "element": "Hero Headline H1",
+    "expected": "Contains non-campus generalized headline",
+    "status": "PASS",
+    "notes": "Turn Surplus Food into Community Meals."
+  },
+  {
+    "id": "NAV_DONATE_CTA",
+    "element": "Sticky Navbar Donate Food Button",
+    "expected": "Present & visible on desktop",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "HERO_PRIMARY_CTA",
+    "element": "Hero Donate Surplus Food CTA",
+    "expected": "Present and links to /donate",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "HERO_SECONDARY_CTA",
+    "element": "Hero Join as Volunteer CTA",
+    "expected": "Present and links to /courier",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "LIVE_STATS_STRIP",
+    "element": "Live Platform Activity Stats Strip",
+    "expected": "Renders live derived impact metrics",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "ROLE_CARDS_3PATHS",
+    "element": "Three Role Selection Cards (Donor, Courier, NGO)",
+    "expected": "All 3 paths present with 1-click links",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "HOW_IT_WORKS_LEGEND",
+    "element": "Shelf-Life & Safety Timer Legend",
+    "expected": "Features Green/Yellow/Red explanations and verified auto-expiry notice",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "LIVE_SURPLUS_TEASER_RENDER",
+    "element": "Live Surplus Board Teaser",
+    "expected": "Renders live surplus section with cards or empty state",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "TEASER_CLAIM_AUTH_GATE",
+    "element": "Teaser Claim Button",
+    "expected": "Empty state correctly displayed when 0 active batches",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "IMPACT_CALCULATOR_REACTIVE",
+    "element": "Community Savings Calculator Slider",
+    "expected": "Recalculates metrics",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "ABOUT_5_PROJECT_AIMS",
+    "element": "About Project & 5 Aims Section",
+    "expected": "Preserves 5 core aims and SDG 2 & 12 mappings",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "FAQ_ACCORDION_ARIA_A11Y",
+    "element": "FAQ Accordion ARIA & Keyboard Navigation",
+    "expected": "Toggles aria-expanded cleanly via click and Enter key",
+    "status": "PASS",
+    "notes": "States: true -> false -> true"
+  },
+  {
+    "id": "FAQ_ACCORDION_SPACE_KEY",
+    "element": "FAQ Accordion Space-Key Toggle",
+    "expected": "Toggles aria-expanded cleanly via Space key",
+    "status": "PASS",
+    "notes": "States: true -> false -> true"
+  },
+  {
+    "id": "ANCHOR_PROBLEM",
+    "element": "Problem Anchor (footer a[href=\"#problem\"])",
+    "expected": "Smooth scrolls to #problem (Scroll: 0px -> 2520px)",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "ANCHOR_HOWITWORKS",
+    "element": "HowItWorks Anchor (footer a[href=\"#how-it-works\"])",
+    "expected": "Smooth scrolls to #how-it-works (Scroll: 0px -> 1477px)",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "ANCHOR_IMPACT",
+    "element": "Impact Anchor (footer a[href=\"#impact\"])",
+    "expected": "Smooth scrolls to #impact (Scroll: 0px -> 2664px)",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "ANCHOR_GETINVOLVED",
+    "element": "GetInvolved Anchor (footer a[href=\"#get-involved\"])",
+    "expected": "Smooth scrolls to #get-involved (Scroll: 0px -> 4757px)",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "QUEUED_CLAIM_AFTER_LOGIN",
+    "element": "Queued Claim Completing After Volunteer Login",
+    "expected": "Teaser claim button present or empty state handled",
+    "status": "PASS",
+    "notes": "No active unclaimed batch in teaser"
+  },
+  {
+    "id": "IMPACT_FOOTNOTE_PRESENCE",
+    "element": "Impact Footnote Check",
+    "expected": "Exact FAO-derived footnote present on both landing calculator and /impact",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "LANDING_MOBILE_LOAD",
+    "element": "Mobile Redesigned Landing (375px)",
+    "expected": "Loads responsively without horizontal overflow",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "MOBILE_NO_HORIZONTAL_SCROLL",
+    "element": "Mobile Viewport Width",
+    "expected": "ScrollWidth (375px) <= ClientWidth (375px)",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "MOBILE_NAV_DRAWER",
+    "element": "Mobile Hamburger Drawer",
+    "expected": "Opens with navigation links on 375px",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "ROUTE_DONATE_CHECK",
+    "element": "Donate Route (/donate)",
+    "expected": "Loads cleanly & functions without regressions",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "ROUTE_COURIER_CHECK",
+    "element": "Courier Route (/courier)",
+    "expected": "Loads cleanly & functions without regressions",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "ROUTE_NGO_CHECK",
+    "element": "NGO Route (/ngo)",
+    "expected": "Loads cleanly & functions without regressions",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "ROUTE_PORTAL_CHECK",
+    "element": "Portal Route (/portal)",
+    "expected": "Loads cleanly & functions without regressions",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "ROUTE_IMPACT_CHECK",
+    "element": "Impact Route (/impact)",
+    "expected": "Loads cleanly & functions without regressions",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "STATS_STRIP_BACKEND_STOPPED_FALLBACK",
+    "element": "Live Stats Strip Fallback (Backend Stopped)",
+    "expected": "Gracefully renders fallback 0 / initial stats without layout shift when backend server is stopped",
+    "status": "PASS",
+    "notes": ""
+  },
+  {
+    "id": "STATS_STRIP_ZERO_DATABASE",
+    "element": "Live Stats Strip Zero-Database Resilience",
+    "expected": "Cleanly displays 0 without depending on non-empty database records",
+    "status": "PASS",
+    "notes": ""
+  }
+]

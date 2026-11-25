@@ -1,102 +1,183 @@
+import bcrypt from "bcryptjs";
+import { z } from "zod";
 import { pool } from "../config/db.js";
+import { AppError } from "../middleware/errors.js";
+import { signToken } from "../middleware/auth.js";
 
-const ROLES = ["donor", "volunteer", "ngo"];
+const isProduction = process.env.NODE_ENV === "production";
+const isDemoMode = process.env.DEMO_MODE === "true" && !isProduction;
 
-// DEMO AUTH: the client sends x-user-id and optional x-user-role. Replace with real login (JWT/OAuth) before production.
-export async function attachUser(req, _res, next) {
-  const rawId = req.get("x-user-id");
-  const rawRole = req.get("x-user-role");
-  let id = Number(rawId);
+export const signupSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(60),
+  email: z.string().trim().email("Invalid email address").max(120),
+  password: z.string().min(8, "Password must be at least 8 characters").max(100),
+  role: z.enum(["donor", "volunteer", "ngo"], {
+    errorMap: () => ({ message: "Role must be 'donor', 'volunteer', or 'ngo'" }),
+  }),
+  org: z.string().trim().max(80).optional(),
+  phone: z.string().trim().max(20).optional(),
+});
 
-  if (isNaN(id) && typeof rawId === "string") {
-    if (rawId.includes("101") || rawId.includes("donor")) id = 1;
-    else if (rawId.includes("201") || rawId.includes("volunteer")) id = 2;
-    else if (rawId.includes("301") || rawId.includes("ngo")) id = 3;
-    else {
-      const match = rawId.match(/\d+/);
-      if (match) id = Number(match[0]);
-    }
-  }
+export const loginSchema = z.object({
+  email: z.string().trim().email("Invalid email address").optional(),
+  password: z.string().min(1, "Password is required").optional(),
+  demoRole: z.enum(["donor", "volunteer", "ngo"]).optional(),
+}).refine(
+  (data) => data.demoRole || (data.email && data.password),
+  { message: "Either email and password or demoRole must be provided." }
+);
 
-  if (Number.isInteger(id) && id > 0) {
-    const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
-    req.user = rows[0] ?? null;
-  }
+/**
+ * Register a new user with hashed password and return 24h JWT.
+ */
+export async function signupUser(req, res, next) {
+  const { name, email, password, role, org, phone } = req.body;
 
-  if (!req.user) {
-    const role = rawRole || (String(rawId).includes("volunteer") || String(rawId).includes("201") ? "volunteer" : String(rawId).includes("ngo") || String(rawId).includes("301") ? "ngo" : "donor");
-    if (role === "volunteer") {
-      req.user = { id: id || 2, name: "Courier Alex", role: "volunteer", org: "Swift Rescue Network" };
-    } else if (role === "ngo") {
-      req.user = { id: id || 3, name: "Hope Shelter Staff", role: "ngo", org: "Hope Shelter Kitchen" };
-    } else {
-      req.user = { id: id || 1, name: "Campus Canteen Manager", role: "donor", org: "Green Valley Dining Hall" };
-    }
-  }
-
-  next();
-}
-
-export const requireRole = (role) => (req, res, next) =>
-  req.user?.role === role ? next() : res.status(403).json({ error: `Only ${role}s can do this` });
-
-export async function getUsers(_req, res) {
   try {
-    const { rows } = await pool.query("SELECT * FROM users ORDER BY id ASC LIMIT 50");
-    res.json(rows);
+    const existing = await pool.query(
+      "SELECT id FROM users WHERE LOWER(email) = LOWER($1)",
+      [email]
+    );
+
+    if (existing.rows && existing.rows.length > 0) {
+      throw new AppError("EMAIL_EXISTS", 409, "An account with this email address already exists.");
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const { rows } = await pool.query(
+      `INSERT INTO users (name, email, password_hash, role, org, phone)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, name, email, role, org, phone, created_at`,
+      [name, email.toLowerCase(), passwordHash, role, org || null, phone || null]
+    );
+
+    const user = rows[0];
+    const token = signToken(user);
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        org: user.org,
+        phone: user.phone,
+        createdAt: user.created_at,
+      },
+    });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch users" });
+    next(err);
   }
 }
 
-export async function loginUser(req, res) {
-  const { name, role } = req.body ?? {};
-  const trimmedName = String(name ?? "").trim();
-  
-  if (!trimmedName) {
-    return res.status(400).json({ error: "Name or identity identifier is required" });
-  }
+/**
+ * Authenticate user with email + password or demoRole in dev mode.
+ */
+export async function loginUser(req, res, next) {
+  const { email, password, demoRole } = req.body;
 
   try {
-    let query = "SELECT * FROM users WHERE LOWER(name) = LOWER($1)";
-    let params = [trimmedName];
+    // 1. Dev Demo Quick Login
+    if (demoRole) {
+      if (!isDemoMode) {
+        throw new AppError(
+          "DEMO_DISABLED",
+          403,
+          "Demo role quick-login is disabled in this environment. Please authenticate with email and password."
+        );
+      }
 
-    if (role && ROLES.includes(role)) {
-      query += " AND role = $2";
-      params.push(role);
-    }
-
-    query += " ORDER BY id DESC LIMIT 1";
-    const { rows } = await pool.query(query, params);
-
-    if (rows.length > 0) {
-      return res.json(rows[0]);
-    }
-
-    // If user not found, create a new user if role is provided
-    if (role && ROLES.includes(role)) {
-      const { rows: newRows } = await pool.query(
-        "INSERT INTO users (name, role, org) VALUES ($1,$2,$3) RETURNING *",
-        [trimmedName.slice(0, 60), role, req.body.org ? String(req.body.org).trim().slice(0, 80) : null]
+      const { rows } = await pool.query(
+        "SELECT id, name, email, password_hash, role, org, phone FROM users WHERE role = $1 ORDER BY id ASC LIMIT 1",
+        [demoRole]
       );
-      return res.status(201).json(newRows[0]);
+
+      if (!rows || rows.length === 0) {
+        throw new AppError("NOT_FOUND", 404, `No demo user seeded for role: ${demoRole}. Please run db:seed.`);
+      }
+
+      const user = rows[0];
+      const token = signToken(user);
+
+      return res.json({
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          org: user.org,
+          phone: user.phone,
+        },
+      });
     }
 
-    return res.status(404).json({ error: "Account not found. Please register or select your role to sign up." });
+    // 2. Standard Email + Password Login
+    const { rows } = await pool.query(
+      "SELECT id, name, email, password_hash, role, org, phone FROM users WHERE LOWER(email) = LOWER($1)",
+      [email]
+    );
+
+    if (!rows || rows.length === 0) {
+      throw new AppError("INVALID_CREDENTIALS", 401, "Invalid email or password.");
+    }
+
+    const user = rows[0];
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+
+    if (!passwordMatch) {
+      throw new AppError("INVALID_CREDENTIALS", 401, "Invalid email or password.");
+    }
+
+    const token = signToken(user);
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        org: user.org,
+        phone: user.phone,
+      },
+    });
   } catch (err) {
-    res.status(500).json({ error: "Login failed: " + err.message });
+    next(err);
   }
 }
 
-export async function createUser(req, res) {
-  const { name, role, org } = req.body ?? {};
-  if (!String(name ?? "").trim() || !ROLES.includes(role)) {
-    return res.status(400).json({ error: "Name and a valid role (donor, volunteer, ngo) are required" });
-  }
-  const { rows } = await pool.query(
-    "INSERT INTO users (name, role, org) VALUES ($1,$2,$3) RETURNING *",
-    [name.trim().slice(0, 60), role, String(org ?? "").trim().slice(0, 80) || null]
-  );
-  res.status(201).json(rows[0]);
+/**
+ * Retrieve authenticated user's own profile.
+ */
+export async function getMe(req, res) {
+  res.json({
+    user: {
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      org: req.user.org,
+      phone: req.user.phone,
+    },
+  });
 }
 
+/**
+ * Restricted listing: only returns public organizational partner summaries.
+ * Never dumps raw emails or passwords.
+ */
+export async function getPartners(_req, res, next) {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, name, role, org FROM users
+       WHERE org IS NOT NULL
+       ORDER BY id ASC LIMIT 30`
+    );
+    res.json({ data: rows });
+  } catch (err) {
+    next(err);
+  }
+}

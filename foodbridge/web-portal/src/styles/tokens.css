@@ -1,0 +1,79 @@
+/**
+ * FoodBridge Canonical Design Tokens
+ * Warm Earth & Harvest Theme
+ * Colors: Cream (#FFF8EC), Leaf Green (#2F5D3A), Tomato (#E8643C), Mango/Mustard (#F2B33D)
+ * Typography: Fraunces (Headings/Display), Quicksand (Subheadings/Pills), Inter (Body)
+ */
+
+:root {
+  /* Surface & Backgrounds */
+  --color-bg-cream: #FFF8EC;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-subtle: #F6EDE0;
+  --color-bg-card: #FFFFFF;
+  --color-bg-elevated: #FFFFFF;
+
+  /* Leaf Green (Primary Brand) */
+  --color-leaf-green: #2F5D3A;
+  --color-leaf-green-light: #417D50;
+  --color-leaf-green-dark: #1E3D26;
+  --color-leaf-green-alpha: rgba(47, 93, 58, 0.12);
+
+  /* Tomato Orange (Action / Urgent / Red) */
+  --color-tomato-orange: #E8643C;
+  --color-tomato-light: #F07E5B;
+  --color-tomato-dark: #C24823;
+  --color-tomato-alpha: rgba(232, 100, 60, 0.14);
+
+  /* Mustard / Mango (Warning / 1-2h countdown / Harvest) */
+  --color-mustard: #F2B33D;
+  --color-mustard-light: #FCD34D;
+  --color-mustard-dark: #D49624;
+  --color-mustard-alpha: rgba(242, 179, 61, 0.18);
+
+  /* Bamboo & Earth */
+  --color-bamboo-dark: #5D4037;
+  --color-bamboo-wood: #8C652D;
+  --color-bamboo-light: #C9A66B;
+  --color-bamboo-straw: #E3C792;
+
+  /* Forest Text & Legibility */
+  --color-forest-text: #1F3326;
+  --color-text-muted: #566E5E;
+  --color-text-light: #8CA093;
+  --color-border: #E6D9C8;
+  --color-border-focus: #2F5D3A;
+
+  /* Typography */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-heading: 'Quicksand', -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, system-ui, sans-serif;
+
+  /* Border Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.85rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-warm-sm: 0 2px 8px rgba(31, 51, 38, 0.05);
+  --shadow-warm-md: 0 6px 20px rgba(31, 51, 38, 0.08);
+  --shadow-warm-lg: 0 12px 36px rgba(31, 51, 38, 0.12);
+
+  /* Motion */
+  --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Header Height */
+  --header-height: 4.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
