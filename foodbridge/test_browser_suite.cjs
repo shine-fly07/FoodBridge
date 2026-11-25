@@ -169,12 +169,12 @@ async function run() {
       record('IMPACT_CALCULATOR_REACTIVE', 'Calculator Slider', 'Functional', 'FAIL', e.message);
     }
 
-    // About Section: 5 Project Aims & UN SDGs
+    // About Section: 5 Project Aims
     const aboutSection = await page.$('#about');
     if (aboutSection) {
       const aboutText = await page.$eval('#about', el => el.textContent);
-      if (aboutText.includes('01') && aboutText.includes('05') && aboutText.includes('SDG 2') && aboutText.includes('SDG 12')) {
-        record('ABOUT_5_PROJECT_AIMS', 'About Project & 5 Aims Section', 'Preserves 5 core aims and SDG 2 & 12 mappings', 'PASS');
+      if (aboutText.includes('01') && aboutText.includes('05') && aboutText.includes('Rapid Surplus Notification')) {
+        record('ABOUT_5_PROJECT_AIMS', 'About Project & 5 Aims Section', 'Preserves 5 core aims', 'PASS');
       } else {
         record('ABOUT_5_PROJECT_AIMS', 'About Project & 5 Aims Section', 'Contains 5 aims', 'FAIL');
       }

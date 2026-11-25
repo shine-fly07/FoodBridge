@@ -79,14 +79,14 @@ export function NgoView({ listings, onAction }) {
 
         <Card className="p-4 bg-[var(--color-bg-surface)] border-[var(--color-border)]">
           <div className="flex items-center justify-between text-xs font-bold font-['Quicksand'] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
-            <span>SDG 2 Compliance</span>
+            <span>Verified Distribution</span>
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="font-['Fraunces'] text-3xl font-bold text-emerald-800">
             100%
           </div>
           <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            Zero-hunger verified distribution trail
+            Zero-waste verified distribution trail
           </p>
         </Card>
       </div>
