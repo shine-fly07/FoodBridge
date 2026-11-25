@@ -232,7 +232,9 @@ function handleLocalMockApi(path, method, body, userId) {
   // GET /api/listings
   if (path.startsWith("/api/listings") && method === "GET") {
     const now = Date.now();
-    return listings.filter((l) => l.status !== "available" || !l.expires_at || new Date(l.expires_at).getTime() > now);
+    return listings.filter(
+      (l) => !["available", "accepted"].includes(l.status) || !l.expires_at || new Date(l.expires_at).getTime() > now
+    );
   }
 
   // POST /api/listings
@@ -264,13 +266,40 @@ function handleLocalMockApi(path, method, body, userId) {
     return newListing;
   }
 
+  // POST /api/listings/:id/accept
+  if (path.match(/\/api\/listings\/\d+\/accept/) && method === "POST") {
+    const id = Number(path.split("/")[3]);
+    const item = listings.find((l) => l.id === id);
+    if (!item) throw new Error("Listing not found");
+    if (item.status !== "available") {
+      const conflictErr = new Error("This listing is no longer available for NGO acceptance.");
+      conflictErr.status = 409;
+      throw conflictErr;
+    }
+
+    const storedUser = JSON.parse(localStorage.getItem("fb_user") || "null");
+    const ngo =
+      Object.values(SEED_USERS).find((candidate) => candidate.id === Number(userId)) ||
+      (storedUser?.role === "ngo" && Number(storedUser.id) === Number(userId)
+        ? { id: Number(userId), org: storedUser.org || storedUser.name }
+        : SEED_USERS.ngo);
+    item.status = "accepted";
+    item.ngo_id = ngo.id;
+    item.ngo_org = ngo.org;
+    item.ngo = { id: ngo.id, org: ngo.org };
+    item.dropoff_address = body.dropoffAddress;
+    item.dropoffAddress = body.dropoffAddress;
+    setStoredListings(listings);
+    return item;
+  }
+
   // POST /api/listings/:id/claim
   if (path.match(/\/api\/listings\/\d+\/claim/) && method === "POST") {
     const id = Number(path.split("/")[3]);
     const item = listings.find((l) => l.id === id);
     if (!item) throw new Error("Listing not found");
 
-    if (item.status !== "available") {
+    if (item.status !== "accepted") {
       const conflictErr = new Error("This listing has already been claimed by another courier.");
       conflictErr.status = 409;
       throw conflictErr;
@@ -289,21 +318,45 @@ function handleLocalMockApi(path, method, body, userId) {
     const id = Number(path.split("/")[3]);
     const item = listings.find((l) => l.id === id);
     if (!item) throw new Error("Listing not found");
+    if (item.status !== "claimed" || item.volunteer_id !== Number(userId)) {
+      const conflictErr = new Error("Only the assigned courier can mark this listing collected.");
+      conflictErr.status = 409;
+      throw conflictErr;
+    }
     item.status = "collected";
     item.collected_at = new Date().toISOString();
     setStoredListings(listings);
     return item;
   }
 
-  // POST /api/listings/:id/distribute
-  if (path.match(/\/api\/listings\/\d+\/distribute/) && method === "POST") {
+  // POST /api/listings/:id/confirm-delivery
+  if (path.match(/\/api\/listings\/\d+\/confirm-delivery/) && method === "POST") {
     const id = Number(path.split("/")[3]);
     const item = listings.find((l) => l.id === id);
     if (!item) throw new Error("Listing not found");
+    if (item.status !== "delivered" || item.ngo_id !== Number(userId)) {
+      const conflictErr = new Error("Only the assigned NGO can confirm receipt after delivery.");
+      conflictErr.status = 409;
+      throw conflictErr;
+    }
     item.status = "distributed";
-    item.ngo_id = Number(userId) || 3;
-    item.ngo_org = "Hope Community Shelter";
     item.distributed_at = new Date().toISOString();
+    setStoredListings(listings);
+    return item;
+  }
+
+  // POST /api/listings/:id/deliver
+  if (path.match(/\/api\/listings\/\d+\/deliver/) && method === "POST") {
+    const id = Number(path.split("/")[3]);
+    const item = listings.find((l) => l.id === id);
+    if (!item) throw new Error("Listing not found");
+    if (item.status !== "collected" || item.volunteer_id !== Number(userId)) {
+      const conflictErr = new Error("Only the assigned courier can confirm this delivery.");
+      conflictErr.status = 409;
+      throw conflictErr;
+    }
+    item.status = "delivered";
+    item.delivered_at = new Date().toISOString();
     setStoredListings(listings);
     return item;
   }
@@ -348,10 +401,10 @@ function handleLocalMockApi(path, method, body, userId) {
   // GET /api/impact/monthly or /summary
   if (path.includes("/api/impact")) {
     const now = Date.now();
-    const collectedAndDistributed = listings.filter((l) => l.status === "collected" || l.status === "distributed");
+    const collectedAndDistributed = listings.filter((l) => ["collected", "delivered", "distributed"].includes(l.status));
     const totalMeals = collectedAndDistributed.reduce((sum, l) => sum + (l.meals || 0), 0);
-    const availableCount = listings.filter((l) => l.status === "available" && (!l.expires_at || new Date(l.expires_at).getTime() > now)).length;
-    const activeCount = availableCount + listings.filter((l) => l.status === "claimed").length;
+    const availableCount = listings.filter((l) => l.status === "accepted" && (!l.expires_at || new Date(l.expires_at).getTime() > now)).length;
+    const activeCount = availableCount + listings.filter((l) => ["claimed", "collected", "delivered"].includes(l.status)).length;
 
     return {
       available: availableCount,
@@ -390,7 +443,8 @@ function handleLocalMockApi(path, method, body, userId) {
 /* -------------------------------------------------------------------------- */
 
 export async function fetchListings() {
-  return apiCall("/api/listings");
+  const result = await apiCall("/api/listings");
+  return Array.isArray(result) ? result : (result?.data || []);
 }
 
 export async function createListing(data, user) {
@@ -416,6 +470,14 @@ export async function claimListing(id, user) {
   });
 }
 
+export async function acceptListing(id, dropoffAddress, user) {
+  return apiCall(`/api/listings/${id}/accept`, {
+    method: "POST",
+    body: { dropoffAddress },
+    userId: user?.id || 3,
+  });
+}
+
 export async function collectListing(id, user) {
   return apiCall(`/api/listings/${id}/collect`, {
     method: "POST",
@@ -423,8 +485,15 @@ export async function collectListing(id, user) {
   });
 }
 
-export async function distributeListing(id, user) {
-  return apiCall(`/api/listings/${id}/distribute`, {
+export async function deliverListing(id, user) {
+  return apiCall(`/api/listings/${id}/deliver`, {
+    method: "POST",
+    userId: user?.id || 2,
+  });
+}
+
+export async function confirmDeliveryListing(id, user) {
+  return apiCall(`/api/listings/${id}/confirm-delivery`, {
     method: "POST",
     userId: user?.id || 3,
   });

@@ -52,13 +52,15 @@ CREATE TABLE IF NOT EXISTS listings (
   notes            TEXT,
   expires_at       TIMESTAMPTZ NOT NULL,
   status           VARCHAR(12) NOT NULL DEFAULT 'available'
-                   CHECK (status IN ('available','claimed','collected','distributed','cancelled','expired')),
+                   CHECK (status IN ('available','accepted','claimed','collected','delivered','distributed','cancelled','expired')),
   volunteer_id     INTEGER REFERENCES users(id),
   ngo_id           INTEGER REFERENCES users(id),
+  dropoff_address  VARCHAR(160),
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
   claimed_at       TIMESTAMPTZ,
   collected_at     TIMESTAMPTZ,
+  delivered_at     TIMESTAMPTZ,
   distributed_at   TIMESTAMPTZ,
   CONSTRAINT chk_expiry_future CHECK (expires_at > created_at)
 );

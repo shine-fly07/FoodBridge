@@ -20,9 +20,10 @@
    - `POST /api/users/signup` is introduced for new registrations with `{ name, email, password, role, org? }`.
    - `POST /api/users` legacy endpoint redirects to `/api/users/signup` or requires authentication.
 3. **Transition Response Shapes**:
-   - `POST /api/listings/:id/claim`, `/collect`, `/distribute` previously returned `{ ok: true }`. They now return the **full updated Listing resource** (`{ id, title, meals, status, ... }`).
+   - Listing transitions return the **full updated Listing resource** (`{ id, title, meals, status, ... }`).
+   - Workflow: donor creates (`available`), NGO accepts with a drop-off address (`accepted`), volunteer claims (`claimed`), collects (`collected`), reports drop-off (`delivered`), then the assigned NGO confirms receipt (`distributed`).
 4. **Impact Calculation & Definitions**:
-   - **"Meals Diverted" Definition**: A meal is officially counted as diverted from waste once it is physically collected by a volunteer courier from the donor facility (`status IN ('collected', 'distributed')`). Unclaimed listings and listings expired prior to collection are never counted.
+   - **"Meals Diverted" Definition**: A meal is officially counted as diverted from waste once it is physically collected by a volunteer courier from the donor facility (`status IN ('collected', 'delivered', 'distributed')`). Unclaimed listings and listings expired prior to collection are never counted.
    - Environmental factors are computed canonically by the backend:
      - `waste_kg = meals * 0.40` (Assumes ~0.4 kg edible portions per meal)
      - `co2e_kg = waste_kg * 2.50` (FAO-derived factor of ~2.5 kg CO2e per kg food waste)
@@ -33,7 +34,7 @@
 6. **User Dump Restriction**:
    - `GET /api/users` is restricted. To fetch current profile, use `GET /api/users/me`.
 7. **Listing Expiry & Claim Abandonment**:
-   - When a listing passes `expires_at` while `status = 'available'`, it is marked `'expired'`.
+   - When a listing passes `expires_at` while `status = 'available'` or `'accepted'`, it is marked `'expired'`.
    - When a listing passes `expires_at` while `status = 'claimed'` but **not collected**, it is automatically transitioned to `'expired'`, courier assignment is revoked, and the food is retired to guarantee food safety.
 
 ---
@@ -139,7 +140,7 @@ Retrieves current authenticated profile.
 Returns active and historical surplus listings.
 
 **Query Parameters**:
-- `status` (optional): `available`, `claimed`, `collected`, `distributed`, `expired`, `cancelled`
+- `status` (optional): `available`, `accepted`, `claimed`, `collected`, `delivered`, `distributed`, `expired`, `cancelled`
 - `limit` (optional, default: 50, max: 100)
 - `offset` (optional, default: 0)
 
@@ -152,9 +153,10 @@ Returns active and historical surplus listings.
       "title": "50 Servings Fresh Veg Curry & Rice",
       "meals": 50,
       "pickupAddress": "Student Center Gate 3, Central Campus",
+      "dropoffAddress": "Hope Shelter, 10 Main Street",
       "notes": "Packed in sanitized containers",
       "expiresAt": "2026-11-25T14:30:00.000Z",
-      "status": "available",
+      "status": "accepted",
       "urgency": "green",
       "minutesLeft": 135,
       "donor": {
@@ -163,7 +165,10 @@ Returns active and historical surplus listings.
         "org": "Green Valley Dining Hall"
       },
       "volunteer": null,
-      "ngo": null,
+      "ngo": {
+        "id": 3,
+        "org": "Hope Community Shelter"
+      },
       "createdAt": "2026-11-25T11:45:00.000Z"
     }
   ],
@@ -199,20 +204,40 @@ Returns the complete created `Listing` resource.
 
 ---
 
-### 3.3 POST /api/listings/:id/claim
-Volunteer courier reserves a batch for delivery.
+### 3.3 POST /api/listings/:id/accept
+An NGO reserves a donor listing and supplies the delivery destination.
+
+**Headers**: `Authorization: Bearer <token>` (Must have role: `ngo`)
+
+**Request Body**:
+```json
+{ "dropoffAddress": "Hope Shelter, 10 Main Street" }
+```
+
+Only the first NGO can accept a listing. The accepted NGO and drop-off address are attached to the order.
+
+**Success Response `200 OK`**: Returns the updated listing with `status: "accepted"`, `ngo`, and `dropoffAddress`.
+
+**Errors**:
+- `409`: Listing was already accepted or is no longer available.
+
+---
+
+### 3.4 POST /api/listings/:id/claim
+Volunteer courier claims an NGO-accepted batch for delivery.
 
 **Headers**: `Authorization: Bearer <token>` (Must have role: `volunteer`)
 
 **Success Response `200 OK`**:
-Returns the complete updated `Listing` resource with `status: "claimed"`, `volunteerId`, and `claimedAt`.
+Returns the complete updated `Listing` resource with `status: "claimed"`, `volunteer`, and `claimedAt`. The response includes both pickup and drop-off addresses.
 
 **Errors**:
-- `409`: `{ "error": { "code": "ALREADY_CLAIMED", "message": "This listing has already been claimed or has expired." } }`
+- `409`: `{ "error": { "code": "NOT_ACCEPTED", "message": "An NGO must accept this listing before a courier can claim it." } }` if not accepted.
+- `409`: `ALREADY_CLAIMED` if another volunteer has claimed the accepted listing.
 
 ---
 
-### 3.4 POST /api/listings/:id/collect
+### 3.5 POST /api/listings/:id/collect
 Volunteer confirms physical pickup from donor kitchen.
 
 **Headers**: `Authorization: Bearer <token>` (Must have role: `volunteer`, must be the claiming volunteer)
@@ -226,17 +251,31 @@ Returns the updated `Listing` resource with `status: "collected"` and `collected
 
 ---
 
-### 3.5 POST /api/listings/:id/distribute
-Shelter / NGO confirms meal receipt.
+### 3.6 POST /api/listings/:id/deliver
+The assigned volunteer reports dropping off the food at the NGO address. This does not complete the order; the listing moves to `delivered` while awaiting NGO receipt confirmation.
 
-**Headers**: `Authorization: Bearer <token>` (Must have role: `ngo`)
+**Headers**: `Authorization: Bearer <token>` (Must have role: `volunteer`, must be the claiming volunteer)
 
 **Success Response `200 OK`**:
-Returns the updated `Listing` resource with `status: "distributed"`, `ngoId`, and `distributedAt`.
+Returns the updated `Listing` resource with `status: "delivered"` and `deliveredAt`.
 
 ---
 
-### 3.6 POST /api/listings/:id/cancel
+### 3.7 POST /api/listings/:id/confirm-delivery
+The NGO assigned during acceptance confirms that the food was received at the drop-off location.
+
+**Headers**: `Authorization: Bearer <token>` (Must have role: `ngo`, must be the assigned NGO)
+
+**Success Response `200 OK`**:
+Returns the updated `Listing` resource with `status: "distributed"` and `distributedAt`, preserving the volunteer's `deliveredAt` report timestamp.
+
+**Errors**:
+- `403`: Only the NGO assigned to the delivery can confirm receipt.
+- `409`: The volunteer has not reported delivery, or receipt was already confirmed.
+
+---
+
+### 3.8 POST /api/listings/:id/cancel
 Donor cancels an unclaimed surplus posting.
 
 **Headers**: `Authorization: Bearer <token>` (Must have role: `donor`, must be posting owner)
@@ -260,6 +299,7 @@ Live community diversion metrics.
   "available": 2,
   "claimed": 1,
   "collected": 3,
+  "delivered": 2,
   "distributed": 12,
   "activeListings": 3,
   "mealsDiverted": 640,

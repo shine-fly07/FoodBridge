@@ -24,7 +24,7 @@ export function PortalView({ listings, onPostListing, onAction, impactData, myOr
   const navigate = useNavigate();
   const { currentUser, activeRole, setActiveRole } = useAuth();
 
-  const [activeTab, setActiveTab] = useState("all"); // "all" | "available" | "claimed" | "collected" | "distributed"
+  const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showDonorForm, setShowDonorForm] = useState(false);
 
@@ -42,6 +42,8 @@ export function PortalView({ listings, onPostListing, onAction, impactData, myOr
   };
 
   const filteredListings = listings.filter((l) => {
+    if (activeRole === "volunteer" && l.status === "available") return false;
+
     // Status filter
     if (activeTab !== "all" && l.status !== activeTab) return false;
 
@@ -50,8 +52,9 @@ export function PortalView({ listings, onPostListing, onAction, impactData, myOr
       const q = searchQuery.toLowerCase();
       const matchTitle = (l.title || "").toLowerCase().includes(q);
       const matchAddr = (l.pickup_address || l.pickupAddress || "").toLowerCase().includes(q);
-      const matchDonor = (l.donor_name || l.donor_org || "").toLowerCase().includes(q);
-      return matchTitle || matchAddr || matchDonor;
+      const matchDropoff = (l.dropoff_address || l.dropoffAddress || "").toLowerCase().includes(q);
+      const matchDonor = (l.donor_name || l.donor?.name || l.donor_org || l.donor?.org || "").toLowerCase().includes(q);
+      return matchTitle || matchAddr || matchDropoff || matchDonor;
     }
     return true;
   });
@@ -157,8 +160,10 @@ export function PortalView({ listings, onPostListing, onAction, impactData, myOr
           {[
             { key: "all", label: "All Statuses" },
             { key: "available", label: "Available" },
+            { key: "accepted", label: "Ready for Pickup" },
             { key: "claimed", label: "Claimed" },
             { key: "collected", label: "Collected" },
+            { key: "delivered", label: "Awaiting NGO Confirmation" },
             { key: "distributed", label: "Distributed" },
           ].map((item) => (
             <button

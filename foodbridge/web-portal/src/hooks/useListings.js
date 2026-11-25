@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import {
   fetchListings,
   createListing as apiCreateListing,
+  acceptListing as apiAcceptListing,
   claimListing as apiClaimListing,
   collectListing as apiCollectListing,
-  distributeListing as apiDistributeListing,
+  deliverListing as apiDeliverListing,
+  confirmDeliveryListing as apiConfirmDeliveryListing,
   cancelListing as apiCancelListing,
 } from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -99,6 +101,18 @@ export function useListings(pollIntervalMs = 20000) {
     }
   };
 
+  const accept = async (id, dropoffAddress) => {
+    try {
+      const updated = await apiAcceptListing(id, dropoffAddress, currentUser);
+      toast.success("Donation accepted. Volunteers can now claim the delivery.");
+      await loadListings(true);
+      return updated;
+    } catch (err) {
+      toast.error(err.message || "Could not accept donation.");
+      throw err;
+    }
+  };
+
   const collect = async (id) => {
     try {
       const updated = await apiCollectListing(id, currentUser);
@@ -111,14 +125,26 @@ export function useListings(pollIntervalMs = 20000) {
     }
   };
 
-  const distribute = async (id) => {
+  const deliver = async (id) => {
     try {
-      const updated = await apiDistributeListing(id, currentUser);
-      toast.success("Distribution confirmed! Impact metrics updated.");
+      const updated = await apiDeliverListing(id, currentUser);
+      toast.success("Delivery reported. The NGO must confirm receipt.");
       await loadListings(true);
       return updated;
     } catch (err) {
-      toast.error(err.message || "Could not confirm distribution.");
+      toast.error(err.message || "Could not report delivery.");
+      throw err;
+    }
+  };
+
+  const confirmDelivery = async (id) => {
+    try {
+      const updated = await apiConfirmDeliveryListing(id, currentUser);
+      toast.success("Food receipt confirmed. Delivery is complete.");
+      await loadListings(true);
+      return updated;
+    } catch (err) {
+      toast.error(err.message || "Could not confirm food receipt.");
       throw err;
     }
   };
@@ -138,20 +164,21 @@ export function useListings(pollIntervalMs = 20000) {
   // Filtered views
   const now = Date.now();
   const availableListings = listings.filter((l) => {
-    const isAvailable = l.status === "available";
-    const expiry = l.expires_at || l.safe_until;
+    const isAvailable = l.status === "accepted";
+    const expiry = l.expiresAt || l.expires_at || l.safe_until;
     const notExpired = !expiry || new Date(expiry).getTime() > now;
     return isAvailable && notExpired;
   });
 
   const claimedListings = listings.filter((l) => l.status === "claimed");
   const collectedListings = listings.filter((l) => l.status === "collected");
+  const deliveredListings = listings.filter((l) => l.status === "delivered");
   const distributedListings = listings.filter((l) => l.status === "distributed");
   const cancelledListings = listings.filter((l) => l.status === "cancelled");
   const expiredListings = listings.filter((l) => l.status === "expired");
 
   const totalDivertedMeals = listings
-    .filter((l) => l.status === "collected" || l.status === "distributed")
+    .filter((l) => ["collected", "delivered", "distributed"].includes(l.status))
     .reduce((sum, l) => sum + (Number(l.meals) || 0), 0);
 
   return {
@@ -160,13 +187,16 @@ export function useListings(pollIntervalMs = 20000) {
     error,
     refresh: () => loadListings(false),
     addListing,
+    accept,
     claim,
     collect,
-    distribute,
+    deliver,
+    confirmDelivery,
     cancel,
     availableListings,
     claimedListings,
     collectedListings,
+    deliveredListings,
     distributedListings,
     cancelledListings,
     expiredListings,
