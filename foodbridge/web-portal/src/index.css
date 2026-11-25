@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Quicksand:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Quicksand:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 @import "./styles/tokens.css";
 
@@ -81,4 +81,25 @@ h4, h5, h6, .font-heading {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-leaf-green-light);
+}
+
+/* Doodle stroke draw-in animation */
+.doodle-stroke {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: doodleDraw 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes doodleDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doodle-stroke {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    animation: none;
+  }
 }

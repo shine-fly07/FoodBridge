@@ -6,18 +6,23 @@
  */
 
 :root {
-  /* Surface & Backgrounds */
-  --color-bg-cream: #FFF8EC;
+  /* Surface & Pastel Backgrounds */
+  --color-bg-cream: #FBF8F1;
   --color-bg-surface: #FFFFFF;
-  --color-bg-subtle: #F6EDE0;
+  --color-bg-subtle: #F6F1E7;
+  --color-bg-mint: #EEF6F0;
   --color-bg-card: #FFFFFF;
   --color-bg-elevated: #FFFFFF;
+  --color-pastel-mint: #EEF6F0;
+  --color-pastel-cream: #FBF8F1;
+  --color-pastel-oat: #F6F1E7;
+  --color-pastel-sage: #E8F2EA;
 
   /* Leaf Green (Primary Brand) */
-  --color-leaf-green: #2F5D3A;
-  --color-leaf-green-light: #417D50;
-  --color-leaf-green-dark: #1E3D26;
-  --color-leaf-green-alpha: rgba(47, 93, 58, 0.12);
+  --color-leaf-green: #2E7D4F;
+  --color-leaf-green-light: #419660;
+  --color-leaf-green-dark: #1E5434;
+  --color-leaf-green-alpha: rgba(46, 125, 79, 0.12);
 
   /* Tomato Orange (Action / Urgent / Red) */
   --color-tomato-orange: #E8643C;
@@ -26,10 +31,10 @@
   --color-tomato-alpha: rgba(232, 100, 60, 0.14);
 
   /* Mustard / Mango (Warning / 1-2h countdown / Harvest) */
-  --color-mustard: #F2B33D;
+  --color-mustard: #F59E0B;
   --color-mustard-light: #FCD34D;
-  --color-mustard-dark: #D49624;
-  --color-mustard-alpha: rgba(242, 179, 61, 0.18);
+  --color-mustard-dark: #D97706;
+  --color-mustard-alpha: rgba(245, 158, 11, 0.18);
 
   /* Bamboo & Earth */
   --color-bamboo-dark: #5D4037;
@@ -38,16 +43,17 @@
   --color-bamboo-straw: #E3C792;
 
   /* Forest Text & Legibility */
-  --color-forest-text: #1F3326;
-  --color-text-muted: #566E5E;
-  --color-text-light: #8CA093;
-  --color-border: #E6D9C8;
-  --color-border-focus: #2F5D3A;
+  --color-forest-text: #16281D;
+  --color-text-muted: #476352;
+  --color-text-light: #6E8878;
+  --color-border: #D6E6DC;
+  --color-border-warm: #E2DDD1;
+  --color-border-focus: #2E7D4F;
 
   /* Typography */
   --font-display: 'Fraunces', Georgia, serif;
-  --font-heading: 'Quicksand', -apple-system, sans-serif;
-  --font-body: 'Inter', -apple-system, system-ui, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', 'Quicksand', -apple-system, sans-serif;
+  --font-body: 'Plus Jakarta Sans', 'Inter', -apple-system, system-ui, sans-serif;
 
   /* Border Radii */
   --radius-sm: 0.5rem;

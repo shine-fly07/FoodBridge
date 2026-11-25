@@ -33,15 +33,6 @@ export function Footer() {
             <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
               FoodBridge connects campus canteens, restaurants, and student volunteers with community shelters to ensure surplus meals reach hungry people instead of landfills.
             </p>
-            {/* SDG Badges */}
-            <div className="flex flex-wrap gap-2 pt-1">
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">
-                <Award className="w-3 h-3 text-amber-600" /> SDG 2: Zero Hunger
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
-                <ShieldAlert className="w-3 h-3 text-emerald-600" /> SDG 12: Responsible Consumption
-              </span>
-            </div>
           </div>
 
           {/* Core Roles */}

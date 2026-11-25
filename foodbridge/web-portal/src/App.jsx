@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
+import { FloatingNav } from "./components/FloatingNav";
 import { AuthModal } from "./components/AuthModal";
 import { ToastProvider, useToast } from "./components/ui/Toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -18,6 +19,7 @@ const PortalView = React.lazy(() => import("./views/PortalView").then((m) => ({ 
 const ImpactView = React.lazy(() => import("./views/ImpactView").then((m) => ({ default: m.ImpactView })));
 const NotFoundView = React.lazy(() => import("./views/NotFoundView").then((m) => ({ default: m.NotFoundView })));
 const GameRedirectView = React.lazy(() => import("./views/GameRedirectView").then((m) => ({ default: m.GameRedirectView })));
+const RedesignPreviewView = React.lazy(() => import("./views/RedesignPreviewView").then((m) => ({ default: m.RedesignPreviewView })));
 
 /**
  * Handles smooth scrolling to landing anchors (#problem, #how-it-works, #impact, #get-involved)
@@ -104,7 +106,7 @@ function MainAppContent() {
       />
 
       {/* Main Route Content */}
-      <main className="flex-1">
+      <main id="main-content" className="flex-1 pb-12">
         <React.Suspense fallback={<Loader text="Loading FoodBridge view..." className="py-20" />}>
           <Routes>
           {/* Main SPA Pages */}
@@ -173,6 +175,7 @@ function MainAppContent() {
             }
           />
           <Route path="/impact" element={<ImpactView />} />
+          <Route path="/preview" element={<RedesignPreviewView />} />
           <Route path="/login" element={<Navigate to="/portal" replace />} />
           <Route path="/signup" element={<Navigate to="/portal" replace />} />
           <Route path="/game" element={<GameRedirectView />} />
@@ -191,6 +194,9 @@ function MainAppContent() {
         </Routes>
         </React.Suspense>
       </main>
+
+      {/* Floating Bottom Navigation Pill */}
+      <FloatingNav />
 
       {/* Shared Unified Footer */}
       <Footer />
