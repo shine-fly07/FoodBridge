@@ -146,6 +146,13 @@ describe("FoodBridge Hardened API Test Suite", () => {
     assert.equal(listing.status, "available");
     assert.equal(listing.meals, 30);
 
+    // Volunteers cannot claim an order until an NGO accepts it.
+    const earlyClaim = await request(app)
+      .post(`/api/listings/${listing.id}/claim`)
+      .set("Authorization", `Bearer ${volunteerToken}`);
+    assert.equal(earlyClaim.status, 409);
+    assert.equal(earlyClaim.body.error.code, "NOT_ACCEPTED");
+
     // Volunteer tries to cancel -> 403
     const badCancel = await request(app)
       .post(`/api/listings/${listing.id}/cancel`)
@@ -160,8 +167,8 @@ describe("FoodBridge Hardened API Test Suite", () => {
     assert.equal(cancelRes.body.status, "cancelled");
   });
 
-  test("7. Concurrency & Race Condition Guard: 10 concurrent claim requests", async () => {
-    // Step 1: Donor creates a fresh listing for race test
+  test("7. NGO Acceptance & Concurrency Guard: one NGO reservation and one courier claim", async () => {
+    // Step 1: Donor creates a fresh listing for acceptance and race test
     const createRes = await request(app)
       .post("/api/listings")
       .set("Authorization", `Bearer ${donorToken}`)
@@ -174,7 +181,33 @@ describe("FoodBridge Hardened API Test Suite", () => {
     assert.equal(createRes.status, 201);
     testListingId = createRes.body.id;
 
-    // Step 2: Fire 10 concurrent claim requests simultaneously
+    // Step 2: An NGO accepts it and supplies the delivery destination.
+    const acceptRes = await request(app)
+      .post(`/api/listings/${testListingId}/accept`)
+      .set("Authorization", `Bearer ${ngoToken}`)
+      .send({ dropoffAddress: "Hope Shelter, 10 Main Street" });
+    assert.equal(acceptRes.status, 200);
+    assert.equal(acceptRes.body.status, "accepted");
+    assert.equal(acceptRes.body.dropoffAddress, "Hope Shelter, 10 Main Street");
+
+    // A different NGO cannot reserve an already accepted listing.
+    const secondNgoRes = await request(app)
+      .post("/api/users/signup")
+      .send({
+        name: "Second Shelter",
+        email: `second-ngo_${Date.now()}@foodbridge.org`,
+        password: "securePassword123",
+        role: "ngo",
+        org: "Second Shelter",
+      });
+    assert.equal(secondNgoRes.status, 201);
+    const duplicateAccept = await request(app)
+      .post(`/api/listings/${testListingId}/accept`)
+      .set("Authorization", `Bearer ${secondNgoRes.body.token}`)
+      .send({ dropoffAddress: "Another Shelter, 5 Side Road" });
+    assert.equal(duplicateAccept.status, 409);
+
+    // Step 3: Fire 10 concurrent claim requests simultaneously
     const claimPromises = Array.from({ length: 10 }, () =>
       request(app)
         .post(`/api/listings/${testListingId}/claim`)
@@ -191,13 +224,18 @@ describe("FoodBridge Hardened API Test Suite", () => {
     assert.equal(conflictCount, 9, `Expected exactly 9 claim conflicts (409), got ${conflictCount}`);
   });
 
-  test("8. Full Food Rescue Pipeline: Claim -> Collect -> Distribute", async () => {
+  test("8. Full Food Rescue Pipeline: NGO confirms volunteer-reported delivery", async () => {
     // Current status is 'claimed' from the race test winner
-    // Attempting to distribute before collection fails with 409
-    const earlyDistribute = await request(app)
-      .post(`/api/listings/${testListingId}/distribute`)
+    // Delivery cannot be confirmed before collection.
+    const earlyDeliver = await request(app)
+      .post(`/api/listings/${testListingId}/deliver`)
+      .set("Authorization", `Bearer ${volunteerToken}`);
+    assert.equal(earlyDeliver.status, 409);
+
+    const earlyReceiptConfirmation = await request(app)
+      .post(`/api/listings/${testListingId}/confirm-delivery`)
       .set("Authorization", `Bearer ${ngoToken}`);
-    assert.equal(earlyDistribute.status, 409);
+    assert.equal(earlyReceiptConfirmation.status, 409);
 
     // Volunteer collects food
     const collectRes = await request(app)
@@ -206,12 +244,37 @@ describe("FoodBridge Hardened API Test Suite", () => {
     assert.equal(collectRes.status, 200);
     assert.equal(collectRes.body.status, "collected");
 
-    // NGO distributes food
-    const distributeRes = await request(app)
-      .post(`/api/listings/${testListingId}/distribute`)
+    // Assigned volunteer reports the drop-off; delivery is not complete until NGO confirmation.
+    const deliverRes = await request(app)
+      .post(`/api/listings/${testListingId}/deliver`)
+      .set("Authorization", `Bearer ${volunteerToken}`);
+    assert.equal(deliverRes.status, 200);
+    assert.equal(deliverRes.body.status, "delivered");
+    assert.equal(deliverRes.body.dropoffAddress, "Hope Shelter, 10 Main Street");
+    assert.ok(deliverRes.body.deliveredAt);
+
+    const secondNgoRes = await request(app)
+      .post("/api/users/signup")
+      .send({
+        name: "Second Shelter",
+        email: `receipt-ngo_${Date.now()}@foodbridge.org`,
+        password: "securePassword123",
+        role: "ngo",
+        org: "Second Shelter",
+      });
+    assert.equal(secondNgoRes.status, 201);
+    const wrongNgoConfirmation = await request(app)
+      .post(`/api/listings/${testListingId}/confirm-delivery`)
+      .set("Authorization", `Bearer ${secondNgoRes.body.token}`);
+    assert.equal(wrongNgoConfirmation.status, 403);
+
+    const confirmRes = await request(app)
+      .post(`/api/listings/${testListingId}/confirm-delivery`)
       .set("Authorization", `Bearer ${ngoToken}`);
-    assert.equal(distributeRes.status, 200);
-    assert.equal(distributeRes.body.status, "distributed");
+    assert.equal(confirmRes.status, 200);
+    assert.equal(confirmRes.body.status, "distributed");
+    assert.ok(confirmRes.body.deliveredAt);
+    assert.ok(confirmRes.body.distributedAt);
   });
 
   test("9. Impact Metrics & Canonical Formula Verification", async () => {

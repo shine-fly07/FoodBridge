@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { SEED_USERS, loginUser as apiLoginUser, registerUser as apiRegisterUser } from "../services/api";
 
 const AuthContext = createContext(null);
@@ -20,15 +20,15 @@ export function AuthProvider({ children }) {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalOptions, setAuthModalOptions] = useState({});
 
-  function openAuthModal(options = {}) {
+  const openAuthModal = useCallback((options = {}) => {
     setAuthModalOptions(options);
     setAuthModalOpen(true);
-  }
+  }, []);
 
-  function closeAuthModal() {
+  const closeAuthModal = useCallback(() => {
     setAuthModalOpen(false);
     setAuthModalOptions({});
-  }
+  }, []);
 
   // Synchronize localStorage
   useEffect(() => {
@@ -55,13 +55,21 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener("foodbridge:session-expired", handleSessionExpired);
   }, []);
 
-  function switchRole(roleKey) {
+  const switchRole = useCallback((roleKey) => {
+    if (currentUser?.role !== roleKey) {
+      const roleNames = { donor: "donor", volunteer: "volunteer", ngo: "NGO" };
+      setAuthModalOptions({
+        message: `Sign in with an account registered as ${roleNames[roleKey] || roleKey} to use this role.`,
+        role: roleKey,
+        tab: "account",
+      });
+      setAuthModalOpen(true);
+      return;
+    }
+
     setActiveRole(roleKey);
     localStorage.setItem("fb_user_role", roleKey);
-    if (SEED_USERS[roleKey]) {
-      setCurrentUser(SEED_USERS[roleKey]);
-    }
-  }
+  }, [currentUser?.role]);
 
   async function login(credentials) {
     const res = await apiLoginUser(credentials);

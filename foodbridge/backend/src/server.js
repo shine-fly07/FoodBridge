@@ -21,9 +21,12 @@ import {
   listListings,
   createListing,
   createListingSchema,
+  acceptListing,
+  acceptListingSchema,
   claimListing,
   collectListing,
-  distributeListing,
+  deliverListing,
+  confirmDeliveryListing,
   cancelListing,
   monthlyImpact,
   pipelineSummary,
@@ -108,9 +111,11 @@ app.get("/api/users", getPartners); // backwards-compatible safe partner summary
 // --- Core Surplus Food Pipeline ---
 app.get("/api/listings", listListings);
 app.post("/api/listings", authenticate, requireRole("donor"), validateBody(createListingSchema), createListing);
+app.post("/api/listings/:id/accept", authenticate, requireRole("ngo"), validateBody(acceptListingSchema), acceptListing);
 app.post("/api/listings/:id/claim", authenticate, requireRole("volunteer"), claimListing);
 app.post("/api/listings/:id/collect", authenticate, requireRole("volunteer"), collectListing);
-app.post("/api/listings/:id/distribute", authenticate, requireRole("ngo"), distributeListing);
+app.post("/api/listings/:id/deliver", authenticate, requireRole("volunteer"), deliverListing);
+app.post("/api/listings/:id/confirm-delivery", authenticate, requireRole("ngo"), confirmDeliveryListing);
 app.post("/api/listings/:id/cancel", authenticate, requireRole("donor"), cancelListing);
 
 // --- Impact Metrics ---
